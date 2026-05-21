@@ -3,13 +3,20 @@
 **  This file contains classes for mathematical data structures used in Solver.cpp program.  **
 **********************************************************************************************/
 
+#include <cmath>
+#include <string>
 #include <vector>
+#include <map>
 #include <numeric>
 #include <algorithm>
+#include <cassert>
 
-using namespace std;
+#define EPSILON 1e-08
 
-template<typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+template<typename T> int sgn(T val) 
+{ 
+    return (T(0) < val) - (val < T(0)); 
+}
 
 //___________________________________MAIN CALCULATION TYPE_____________________________________
 using CalcType = double;
@@ -18,279 +25,330 @@ using CalcType = double;
 //_________________________________VECTOR OF CALCULATION TYPE__________________________________
 class Vector
 {
-    vector<CalcType> vec;
+    std::vector<CalcType> vec;
 
 public:
-    Vector(vector<CalcType> base_vec) : vec(base_vec) {}
-
-    Vector(const int n=0) { vec.resize(n); }
-
-    Vector(const int n, CalcType val)
+    Vector(std::vector<CalcType> stlVec)
     {
-        for (int i=0; i<n; i++)
+        vec.assign(stlVec.begin(), stlVec.end());
+    }
+
+    Vector(const int size = 0) 
+    {
+        vec.resize(size); 
+    }
+
+    Vector(const int size, CalcType val)
+    {
+        vec.reserve(size);
+        for (int i=0; i<size; i++)
+        {
             vec.push_back(val);
+        }
     }
 
     //....................Returns the original vector (required for drawing plots)
-    vector<CalcType> get_vector() { return vec; }
-
-    //....................Vector indexing operator
-    CalcType& operator [] (const int index) { return vec.at(index); }
-
-    //....................Returns true if vector is empty
-    bool empty() { return vec.empty(); }
-
-    //....................Returns Vector's size
-    int size() { return vec.size(); }
-
-    //....................Modifies Vector's size
-    void resize(int n) { vec.resize(n); }
-
-    //....................Clears Vector
-    void clear() { vec.clear(); }
-    
-    //....................Sorts Vector
-    void sort() { std::sort(vec.begin(), vec.end()); }
-
-    //....................Adds an element to the back of Vector
-    void add(CalcType new_elem) { vec.push_back(new_elem); }
-
-    //....................Adds a Vector to the back of Vector
-    void add(Vector new_vec)
-    {
-        for (int i=0; i<new_vec.size(); i++)
-            vec.push_back(new_vec[i]);
+    std::vector<CalcType> get_vector()
+    { 
+        return vec; 
     }
 
-    //....................Adds a unique element to the back of Vector. Returns true if the element was added
-    bool add_unique(CalcType new_elem)
+    //....................Vector indexing operator
+    CalcType& operator [] (const int index) 
+    { 
+        return vec.at(index); 
+    }
+
+    //....................Returns true if vector is empty
+    bool empty() 
+    { 
+        return vec.empty(); 
+    }
+
+    //....................Returns Vector's size
+    int size() 
+    { 
+        return vec.size(); 
+    }
+
+    //....................Modifies Vector's size
+    void resize(int newSize) 
+    { 
+        vec.resize(newSize); 
+    }
+
+    //....................Clears Vector
+    void clear() 
+    { 
+        vec.clear(); 
+    }
+    
+    //....................Sorts Vector
+    void sort() 
+    { 
+        std::sort(vec.begin(), vec.end()); 
+    }
+
+    //....................Adds an item to the back of Vector
+    void add(CalcType newItem)
+    { 
+        vec.push_back(newItem); 
+    }
+
+    //....................Adds a Vector to the back of Vector
+    void add(Vector newVec)
     {
-        if (std::find(vec.begin(), vec.end(), new_elem) == vec.end())
+        std::vector<CalcType> newVecStl = newVec.get_vector();
+        vec.insert(vec.end(), newVecStl.begin(), newVecStl.end());
+    }
+
+    //....................Adds a unique item to the back of Vector. Returns true if the item was added
+    bool add_unique(CalcType newItem)
+    {
+        std::vector<CalcType>::iterator it = std::find(vec.begin(), vec.end(), newItem);
+        if (it == vec.end())
         {
-            vec.push_back(new_elem);
+            vec.push_back(newItem);
             return true;
         }
         return false;
     }
     
     //....................Returns first element of Vector
-    CalcType first() { return vec.at(0); }
+    CalcType first() 
+    { 
+        return vec.at(0); 
+    }
 
     //....................Returns last element of Vector
-    CalcType last() { return vec.at(vec.size() - 1); }
+    CalcType last() 
+    { 
+        return vec.at(vec.size() - 1); 
+    }
 
     //....................Returns first n elements of Vector
     Vector head(int n)                  
     {
-        Vector res;
-        for (int i=0; i<n; i++)
-            res.add(vec.at(i));
-        return res; 
+        std::vector<CalcType> vecHead(vec.begin(), vec.begin() + n);
+        return Vector(vecHead); 
     }
 
     //....................Returns last n elements of Vector
     Vector tail(int n)
     {
-        Vector res;
-        for (int i=n; i>0; i--)
-            res.add(vec.at(vec.size() - i));
-        return res; 
+        std::vector<CalcType> vecTail(vec.end() - n, vec.end());
+        return Vector(vecTail);
     }
 
     //....................Erases first n elements of Vector
     void erase_first(int n)
     {
         for (int i=0; i<n; i++)
+        {
             vec.erase(vec.begin());
+        }
     }
 
     //....................Returns vector element of the lowest value
-    CalcType min_value() { return *min_element(vec.begin(), vec.end()); }
+    CalcType min_value()
+    {
+        return *min_element(vec.begin(), vec.end()); 
+    }
 
     //....................Returns vector element of the highest value
-    CalcType max_value() { return *max_element(vec.begin(), vec.end()); }
+    CalcType max_value() 
+    { 
+        return *max_element(vec.begin(), vec.end()); 
+    }
 
     //....................Returns a sum of vector elements
-    CalcType sum() { return std::accumulate(vec.begin(), vec.end(), 0.00000000); }
+    CalcType sum() 
+    { 
+        return std::accumulate(vec.begin(), vec.end(), 0.00000000); 
+    }
     
     //....................Returns an average value of vector elements
-    CalcType avg_value() { return vec.empty() ? 0 : std::accumulate(vec.begin(), vec.end(), 0.00000000) / vec.size(); }
+    CalcType avg_value() 
+    { 
+        return vec.empty() ? 0 : std::accumulate(vec.begin(), vec.end(), 0.00000000) / vec.size(); 
+    }
 
     //....................Sets a linearly spaced Vector
-    static Vector setLinSpaced(CalcType num, CalcType min_val, CalcType max_val)
+    static Vector setLinSpaced(CalcType size, CalcType minVal, CalcType maxVal)
     {
-        Vector result;
-        CalcType step = (max_val - min_val) / (num - 1);
-
-        for (int i=0; i<num-1; i++)
-            result.add(min_val + i * step);
-        result.add(max_val);
-
+        Vector result(size);
+        CalcType step = (maxVal - minVal) / (size - 1);
+        for (int i=0; i<size-1; i++)
+        {
+            result[i] = minVal + i * step;
+        }
+        result[size - 1] = maxVal;
         return result;
     }
 
     //....................Natural logarithm of vector elements
     static Vector log(Vector arg)
     {
-        Vector result;
-        for (int i=0; i<arg.size(); i++)
-            result.add(std::log(arg[i]));
-        
-        return result;
+        std::vector<CalcType> argVec = arg.get_vector();
+        std::vector<CalcType> logVec = argVec;
+        std::transform(argVec.begin(), argVec.end(), logVec.begin(), [](CalcType a) {
+            return std::log(a);
+        });
+        return Vector(logVec);
     }
 
     //....................Absolute values of vector elements
     static Vector abs(Vector arg)
     {
-        Vector result;
-        for (int i=0; i<arg.size(); i++)
-            result.add(std::abs(arg[i]));
-
-        return result;
+        std::vector<CalcType> argVec = arg.get_vector();
+        std::vector<CalcType> absVec = argVec;
+        std::transform(argVec.begin(), argVec.end(), absVec.begin(), [](CalcType a) {
+            return std::abs(a);
+        });
+        return Vector(absVec);
     }
 
     //....................Vector + calculation type value
-    Vector operator + (CalcType add_val)
+    Vector operator + (CalcType addVal)
     {
-        Vector sum;
-
-        for (int i=0; i<vec.size(); i++)
-            sum.add(vec.at(i) + add_val);
-
-        return sum;
+        std::vector<CalcType> sum = vec;
+        std::transform(vec.begin(), vec.end(), sum.begin(), [addVal](CalcType a){
+            return a + addVal;
+        });
+        return Vector(sum);
     }
 
     //....................Vector - calculation type value
-    Vector operator - (CalcType sub_val)
+    Vector operator - (CalcType subVal)
     {
-        Vector sub_result;
-
-        for (int i=0; i<vec.size(); i++)
-            sub_result.add(vec.at(i) - sub_val);
-
-        return sub_result;
+        std::vector<CalcType> sub = vec;
+        std::transform(vec.begin(), vec.end(), sub.begin(), [subVal](CalcType a){
+            return a - subVal;
+        });
+        return Vector(sub);
     }
     
     //....................-Vector
     Vector operator - ()
     {
-        Vector minus_vec;
-
-        for (int i=0; i<vec.size(); i++)
-            minus_vec.add(-1 * vec.at(i));
-        
-        return minus_vec;
+        std::vector<CalcType> negativeVec = vec;
+        std::transform(vec.begin(), vec.end(), negativeVec.begin(), [](CalcType a){
+            return a * -1;
+        });
+        return Vector(negativeVec);
     }
 
     //....................Vector * calculation type value
-    Vector operator * (CalcType com_val)
+    Vector operator * (CalcType comVal)
     {
-        Vector composition;
-
-        for (int i=0; i<vec.size(); i++)
-            composition.add(vec.at(i) * com_val);
-
-        return composition;
+        std::vector<CalcType> product = vec;
+        std::transform(vec.begin(), vec.end(), product.begin(), [comVal](CalcType a){
+            return a * comVal;
+        });
+        return Vector(product);
     }
 
     //....................Vector / calculation type value
-    Vector operator / (CalcType div_val)
+    Vector operator / (CalcType divVal)
     {
-        Vector quotient;
-
-        for (int i=0; i<vec.size(); i++)
-            quotient.add(vec.at(i) / div_val);
-
+        std::vector<CalcType> quotient = vec;
+        std::transform(vec.begin(), vec.end(), quotient.begin(), [divVal](CalcType a){
+            return a / divVal;
+        });
         return quotient;
     }
 
     //....................Vector + Vector
-    Vector operator + (Vector add_vec)
+    Vector operator + (Vector addVec)
     {
-        int max_size = vec.size();
-        max_size = max(max_size, add_vec.size());
-        Vector sum;
-
-        vec.resize(max_size);
-        add_vec.resize(max_size);
-        for (int i=0; i<max_size; i++)
-            sum.add(vec.at(i) + add_vec[i]);
-
+        int maxSize = std::max((int) vec.size(), (int) addVec.size());
+        Vector sum(vec);
+        sum.resize(maxSize);
+        addVec.resize(maxSize);
+        for (int i=0; i<maxSize; i++)
+        {
+            sum[i] += addVec[i];
+        }
         return sum;
     }
 
     //....................Vector - Vector
-    Vector operator - (Vector sub_vec)
+    Vector operator - (Vector subVec)
     {
-        int max_size = vec.size();
-        max_size = max(max_size, sub_vec.size());
-        Vector sub_result;
-
-        vec.resize(max_size);
-        sub_vec.resize(max_size);
-        for (int i=0; i<max_size; i++)
-            sub_result.add(vec.at(i) - sub_vec[i]);
-
-        return sub_result;
+        int maxSize = std::max((int) vec.size(), (int) subVec.size());
+        Vector sub(vec);
+        sub.resize(maxSize);
+        subVec.resize(maxSize);
+        for (int i=0; i<maxSize; i++)
+        {
+            sub[i] -= subVec[i];
+        }
+        return sub;
     }
 
     //....................Vector * Vector
-    Vector operator * (Vector com_vec)
+    Vector operator * (Vector comVec)
     {
-        int max_size = vec.size();
-        max_size = max(max_size, com_vec.size());
-        Vector composition;
-
-        vec.resize(max_size);
-        com_vec.resize(max_size);
-        for (int i=0; i<max_size; i++)
-            composition.add(vec.at(i) * com_vec[i]);
-
-        return composition;
+        int maxSize = std::max((int) vec.size(), (int) comVec.size());
+        Vector product(vec);
+        product.resize(maxSize);
+        comVec.resize(maxSize);
+        for (int i=0; i<maxSize; i++)
+        {
+            product[i] *= comVec[i];
+        }
+        return product;
     }
 
     //....................Vector / Vector
-    Vector operator / (Vector div_vec)
+    Vector operator / (Vector divVec)
     {
-        int max_size = vec.size();
-        max_size = max(max_size, div_vec.size());
-        Vector quotient;
-
-        vec.resize(max_size);
-        div_vec.resize(max_size);
-        for (int i=0; i<max_size; i++)
-            quotient.add(vec.at(i) / div_vec[i]);
-
+        int maxSize = std::max((int) vec.size(), (int) divVec.size());
+        Vector quotient(vec);
+        quotient.resize(maxSize);
+        divVec.resize(maxSize);
+        for (int i=0; i<maxSize; i++)
+        {
+            quotient[i] /= divVec[i];
+        }
         return quotient;
     }
 
-    vector<CalcType>::iterator begin() { return vec.begin(); }
+    std::vector<CalcType>::iterator begin()
+    { 
+        return vec.begin(); 
+    }
 
-    vector<CalcType>::iterator end() { return vec.end(); }
+    std::vector<CalcType>::iterator end() 
+    { 
+        return vec.end(); 
+    }
 
-    friend ostream& operator << (ostream& out, const Vector &v)
+    friend std::ostream& operator << (std::ostream& out, const Vector &v)
 	{
 		out << v.vec.at(0);
 		for(int i=1; i<v.vec.size(); i++)
+        {
 			out << ", " << v.vec.at(i);
-		out << '\n';
+        }
+        out << '\n';
 		return out;
 	}
 
-    pair<int, CalcType> MaxStep()
+    std::pair<int, CalcType> MaxStep()
     {
-        CalcType max_step = vec.at(1) - vec.at(0);
-        int index = 1;
+        CalcType maxStep = vec.at(1) - vec.at(0);
+        int maxStepIndex = 1;
         for (int i=2; i<vec.size(); i++)
         {
-            CalcType step = vec.at(i) - vec.at(i-1);
-            if (step > max_step)
+            CalcType currStep = vec.at(i) - vec.at(i - 1);
+            if (currStep > maxStep)
             {
-                max_step = step;
-                index = i;
+                maxStep = currStep;
+                maxStepIndex = i;
             }
         }
-        return make_pair(index, max_step);
+        return std::make_pair(maxStepIndex, maxStep);
     }
 };
 
@@ -298,132 +356,167 @@ public:
 //______________________________SQUARE MATRIX OF CALCULATION TYPE_____________________________
 class Matrix
 {
-    vector<Vector> mat;
+    std::vector<Vector> mat;
 
 public:
-    Matrix(const int size=0) { resize(size); }
+    Matrix(const int size = 0)
+    { 
+        resize(size); 
+    }
 
     Matrix(const int size, CalcType val)
     {
-        resize(size);
+        mat.reserve(size);
         for (int i=0; i<size; i++)
-            for (int j=0; j<size; j++)
-                mat.at(i)[j] = val;
+        {
+            mat.push_back(Vector(size, val));
+        }
     }
 
-    Vector& operator [] (const int row_num) { return mat.at(row_num); }
-
-    int size() { return mat.size(); }
-
-    void resize(const int size)
-    {
-        mat.resize(size);
-        for (int i=0; i<size; i++)
-            mat[i].resize(size);
+    Vector& operator [] (const int rowNum)
+    { 
+        return mat.at(rowNum); 
     }
 
-    Vector Row(const int row_num) { return mat.at(row_num); }
+    int size()
+    { 
+        return mat.size(); 
+    }
 
-    Vector Col(const int col_num)
+    void resize(const int newSize)
     {
-        Vector col;
-        for (int i=0; i<mat.size(); i++)
-            col.add(mat.at(i)[col_num]);
-        return col;
+        mat.resize(newSize);
+        for (auto &col : mat)
+        {
+            col.resize(newSize);
+        }
     }
 
     void resize(const int r, const int c)
     {
         mat.resize(r);
         for (int i=0; i<r; i++)
+        {
             mat[i].resize(c);
+        }
+    }
+
+    Vector Row(const int rowNum) 
+    { 
+        return mat.at(rowNum); 
+    }
+
+    Vector Col(const int colNum)
+    {
+        Vector col(mat.size());
+        for (int i=0; i<mat.size(); i++)
+        {
+            col[i] = mat.at(i)[colNum];
+        }
+        return col;
     }
 
     //....................Returns an element of Matrix which has the lowest value
     CalcType min_value()
     {
-        vector<CalcType> min_values_vec;
+        std::vector<CalcType> minVals;
+        minVals.reserve(mat.size());
         for (int i=0; i<mat.size(); i++)
-            min_values_vec.push_back(mat[i].min_value());
-        
-        return *max_element(min_values_vec.begin(), min_values_vec.end());
+        {
+            minVals.push_back(mat.at(i).min_value());
+        }
+        return *min_element(minVals.begin(), minVals.end());
     }
 
     //....................Returns an element of Matrix which has the highest value
     CalcType max_value()
     {
-        vector<CalcType> max_values_vec;
+        std::vector<CalcType> maxVals;
+        maxVals.reserve(mat.size());
         for (int i=0; i<mat.size(); i++)
-            max_values_vec.push_back(mat[i].max_value());
-        
-        return *max_element(max_values_vec.begin(), max_values_vec.end());
+        {
+            maxVals.push_back(mat.at(i).max_value());
+        }
+        return *max_element(maxVals.begin(), maxVals.end());
     }
 
     //....................Matrix + calculation type value
-    Matrix operator + (CalcType add_val)
+    Matrix operator + (CalcType addVal)
     {
-        Matrix sum(mat.size(), mat.at(0).size());
-
+        Matrix sum(mat.size());
         for (int i=0; i<sum.size(); i++)
+        {
             for (int j=0; j<sum.size(); j++)
-                sum[i][j] = mat.at(i)[j] + add_val;
-
+            {
+                sum[i][j] = mat.at(i)[j] + addVal;
+            }
+        }
         return sum;
     }
 
     //....................Matrix - calculation type value
-    Matrix operator - (CalcType sub_val)
+    Matrix operator - (CalcType subVal)
     {
-        Matrix sub_result(mat.size(), mat.at(0).size());
-        
-        for (int i=0; i<sub_result.size(); i++)
-            for (int j=0; j<sub_result.size(); j++)
-                sub_result[i][j] = mat.at(i)[j] - sub_val;
-
-        return sub_result;
+        Matrix sub(mat.size());
+        for (int i=0; i<sub.size(); i++)
+        {
+            for (int j=0; j<sub.size(); j++)
+            {
+                sub[i][j] = mat.at(i)[j] - subVal;
+            }
+        }
+        return sub;
     }
     
     //....................-Matrix
     Matrix operator - ()
     {
-        Matrix minus_mat(mat.size(), mat.at(0).size());
-        
-        for (int i=0; i<minus_mat.size(); i++)
-            for (int j=0; j<minus_mat.size(); j++)
-                minus_mat[i][j] = -1 * mat.at(i)[j];
-        
-        return minus_mat;
+        Matrix negativeMat(mat.size());
+        for (int i=0; i<negativeMat.size(); i++)
+        {
+            for (int j=0; j<negativeMat.size(); j++)
+            {
+                negativeMat[i][j] = -1 * mat.at(i)[j];
+            }
+        }
+        return negativeMat;
     }
 
     //....................Matrix * calculation type value
-    Matrix operator * (CalcType com_val)
+    Matrix operator * (CalcType comVal)
     {
-        Matrix composition(mat.size(), mat.at(0).size());
-        
-        for (int i=0; i<composition.size(); i++)
-            for (int j=0; j<composition.size(); j++)
-                composition[i][j] = mat.at(i)[j] * com_val;
-
-        return composition;
+        Matrix product(mat.size());
+        for (int i=0; i<product.size(); i++)
+        {
+            for (int j=0; j<product.size(); j++)
+            {
+                product[i][j] = mat.at(i)[j] * comVal;
+            }
+        }
+        return product;
     }
 
     //....................Matrix / calculation type value
-    Matrix operator / (CalcType div_val)
+    Matrix operator / (CalcType divVal)
     {
-        Matrix quotient(mat.size(), mat.at(0).size());
-        
+        Matrix quotient(mat.size());
         for (int i=0; i<quotient.size(); i++)
+        {
             for (int j=0; j<quotient.size(); j++)
-                quotient[i][j] = mat.at(i)[j] / div_val;
-
+            {
+                quotient[i][j] = mat.at(i)[j] / divVal;
+            }
+        }
         return quotient;
     }
 
-    friend ostream& operator << (ostream& out, const Matrix &m)
+    friend std::ostream& operator << (std::ostream& out, const Matrix &m)
 	{
         for (int i=0; i<m.mat.size(); i++)
+        {
             out << m.mat.at(i);
-		return out;
+        }
+        return out;
 	}
 };
 
@@ -431,37 +524,54 @@ public:
 //____________________________VECTOR OF MATRIX OF CALCULATION TYPE_____________________________
 class VectorOfMatrix
 {
-    vector<Matrix> vecofmat;
+    std::vector<Matrix> vecOfMat;
 
 public:
-    VectorOfMatrix(const int n=0) { vecofmat.resize(n); }
+    VectorOfMatrix(const int size = 0)
+    { 
+        vecOfMat.resize(size);
+    }
 
     //....................Returns the size of Vector of Matrix
-    int size() { return vecofmat.size(); }
+    int size()
+    { 
+        return vecOfMat.size(); 
+    }
 
     //....................Vector of Matrix indexing operator
-    Matrix& operator () (const int index) { return vecofmat.at(index); }
+    Matrix& operator () (const int index)
+    { 
+        return vecOfMat.at(index); 
+    }
 };
 
 
 //____________________________MATRIX OF MATRIX OF CALCULATION TYPE_____________________________
 class MatrixOfMatrix
 {
-    vector<vector<Matrix>> matofmat;
+    std::vector<std::vector<Matrix>> matOfMat;
 
 public:
-    MatrixOfMatrix(const int size=0)
+    MatrixOfMatrix(const int size = 0)
     {
-        matofmat.resize(size);
+        matOfMat.resize(size);
         for (int i=0; i<size; i++)
-            matofmat.at(i).resize(size);
+        {
+            matOfMat.at(i).resize(size);
+        }
     }
 
     //....................Returns numbers of rows & columns in Matrix of Matrix
-    int size() { return matofmat.size(); }
+    int size() 
+    { 
+        return matOfMat.size(); 
+    }
 
     //....................Matrix of Matrix indexing operator
-    Matrix& operator () (const int row_index, const int col_index) { return matofmat.at(row_index).at(col_index); }
+    Matrix& operator () (const int rowIndex, const int colIndex) 
+    { 
+        return matOfMat.at(rowIndex).at(colIndex); 
+    }
 };
 
 
@@ -471,140 +581,148 @@ class Function
     Vector x;
     Vector y;
 
-private:
-    static bool SortByX(const pair<CalcType, CalcType> &a, const pair<CalcType, CalcType> &b)
-    { return (a.first < b.first); }
-
 public:
-    Function(const int size=0)
+    Function(const int size = 0)
     {
         x.resize(size);
         y.resize(size);
     }
 
-    Function(Vector x_grid, Vector y_values) : x(x_grid), y(y_values) {}
+    Function(Vector xGrid, Vector yVals) : x(xGrid), y(yVals) {}
 
-    Function(Vector x_grid, Matrix y_values)
+    Function(Vector xGrid, Matrix yVals)
     {
-        vector<pair<CalcType, CalcType>> x_and_y;
-        for (int i=0; i<x_grid.size(); i++)
+        std::map<CalcType, CalcType> XY;
+        for (int i=0; i<xGrid.size(); i++)
         {
-            for (int j=i; j<x_grid.size(); j++)
+            for (int j=i; j<xGrid.size(); j++)
             {
-                assert (std::abs(y_values[i][j] - y_values[j][i]) < 1e-08);
-                CalcType x_hypot = std::hypot(x_grid[i], x_grid[j]);
-                x_and_y.push_back(make_pair(x_hypot, y_values[i][j]));
+                assert (std::abs(yVals[i][j] - yVals[j][i]) < EPSILON);
+                CalcType xHypot = std::hypot(xGrid[i], xGrid[j]);
+                XY.insert({ xHypot, yVals[i][j] });
             }
         }
-        sort(x_and_y.begin(), x_and_y.end(), SortByX);
-        for (auto pair : x_and_y)
+        for (auto coord : XY)
         {
-            x.add(pair.first);
-            y.add(pair.second);
+            x.add(coord.first);
+            y.add(coord.second);
         }
     }
 
-    Function(Vector x_grid, Matrix y_values, CalcType max_x_value)
+    Function(Vector xGrid, Matrix yVals, CalcType xMax)
     {
-        vector<pair<CalcType, CalcType>> x_and_y;
-        for (int i=0; i<x_grid.size(); i++)
+        std::map<CalcType, CalcType> XY;
+        for (int i=0; i<xGrid.size(); i++)
         {
-            for (int j=i; j<x_grid.size(); j++)
+            for (int j=i; j<xGrid.size(); j++)
             {
-                assert (std::abs(y_values[i][j] - y_values[j][i]) < 1e-08);
-                CalcType x_hypot = std::hypot(x_grid[i], x_grid[j]);
-                x_and_y.push_back(make_pair(x_hypot, y_values[i][j]));
+                assert (std::abs(yVals[i][j] - yVals[j][i]) < EPSILON);
+                CalcType xHypot = std::hypot(xGrid[i], xGrid[j]);
+                XY.insert({ xHypot, yVals[i][j] });
             }
         }
-        sort(x_and_y.begin(), x_and_y.end(), SortByX);
         
-        int i = 0; 
-        while (x_and_y.at(i).first <= max_x_value)
+        std::map<CalcType, CalcType>::iterator it = XY.begin();
+        while (it != XY.end() && it->first <= xMax)
         {
-            x.add(x_and_y.at(i).first);
-            y.add(x_and_y.at(i).second);
-            i++;
+            x.add(it->first);
+            y.add(it->second);
         }
     }
 
-    int size() { return x.size(); }
-
-    Vector X() { return x; }
-
-    Vector Y() { return y; }
-
-    static Function trim(Function func, CalcType final_x_value)
-    {
-        auto x_values = func.X().get_vector();
-        auto it = std::find(x_values.begin(), x_values.end(), final_x_value);
-        assert (it != x_values.end());
-        int final_index = std::distance(x_values.begin(), it);
-        
-        Vector x_values_trimmed;
-        Vector y_values_trimmed;
-        for (int i=0; i<=final_index; i++)
-        {
-            x_values_trimmed.add(func.X()[i]);
-            y_values_trimmed.add(func.Y()[i]);
-        }
-
-        Function func_trimmed(x_values_trimmed, y_values_trimmed);
-        return func_trimmed;
+    int size()
+    { 
+        return x.size(); 
     }
 
-    CalcType findY(CalcType x_value)
+    Vector X() 
+    { 
+        return x; 
+    }
+
+    Vector Y() 
+    { 
+        return y; 
+    }
+
+    static Function trim(Function func, CalcType xFinal)
     {
-        assert ((x_value >= x[0]) && (x_value <= x.last()));
+        auto xVals = func.X().get_vector();
+        auto it = std::find(xVals.begin(), xVals.end(), xFinal);
+        assert (it != xVals.end());
+        int finalIndex = std::distance(xVals.begin(), it);
         
-        auto it = std::find(x.get_vector().begin(), x.get_vector().end(), x_value);
-        assert (it != x.get_vector().end());
+        Vector xValsTrimmed;
+        Vector yValsTrimmed;
+        for (int i=0; i<=finalIndex; i++)
+        {
+            xValsTrimmed.add(func.X()[i]);
+            yValsTrimmed.add(func.Y()[i]);
+        }
+        return Function(xValsTrimmed, yValsTrimmed);
+    }
+
+    CalcType findY(CalcType xVal)
+    {
+        assert ((xVal >= x[0]) && (xVal <= x.last()));
         
-        int index = std::distance(x.get_vector().begin(), it);
+        std::vector<CalcType> xStl = x.get_vector();
+        std::vector<CalcType>::iterator it = std::find(xStl.begin(), xStl.end(), xVal);
+        assert (it != xStl.end());
+        
+        int index = std::distance(xStl.begin(), it);
         return y[index];
     }
 
-    pair<bool, CalcType> ConstantSign()
+    std::pair<bool, CalcType> ConstantSign()
     {
-        bool is_constant = true;
-        int sign_init = sgn(y[1] - y[0]);
+        bool isConstant = true;
+        int signInit = sgn(y[1] - y[0]);
         CalcType val = 0;
         for (int i=2; i<y.size(); i++)
         {
             int sign = sgn(y[i] - y[i-1]);
-            if ((sign != sign_init) && (sign != 0))
+            if ((sign != signInit) && (sign != 0))
             {
-                is_constant = false;
+                isConstant = false;
                 val = x[i];
             }
         }
-        return make_pair(is_constant, val);
+        return std::make_pair(isConstant, val);
     }
 
-    CalcType Interpolate(CalcType x_value)
+    CalcType Interpolate(CalcType xVal)
     {
         int i = 1;
-        while (x_value > x[i])
+        while (xVal > x[i])
+        {
             i++;
-
-        //cout << "X[i-1] = " << x[i-1] << "   X[i] = " << x[i] << "\nY[i-1] = " << y[i-1] << "   Y[i] = " << y[i] << "\n\n";
-        
-        CalcType weight = (x_value - x[i-1]) / (x[i] - x[i-1]);
-        CalcType y_value = y[i-1] + weight * (y[i] - y[i-1]);
-        return y_value;
+        }
+        /**
+        cout << "X[i-1] = " << x[i - 1]
+             << "   X[i] = " << x[i] 
+             << "\nY[i-1] = " << y[i - 1] 
+             << "   Y[i] = " << y[i] << "\n\n";
+        */
+        CalcType weight = (xVal - x[i - 1]) / (x[i] - x[i - 1]);
+        CalcType yVal = y[i - 1] + weight * (y[i] - y[i - 1]);
+        return yVal;
     }
 
-    CalcType Interpolate(CalcType x_value, CalcType asymptotic_value)
+    CalcType Interpolate(CalcType xVal, CalcType asymptoticVal)
     {
-        if (x_value > x.last())
-            return asymptotic_value;
-
+        if (xVal > x.last())
+        {
+            return asymptoticVal;
+        }
         int i = 1;
-        while (x_value > x[i])
+        while (xVal > x[i])
+        {
             i++;
-        
-        CalcType weight = (x_value - x[i-1]) / (x[i] - x[i-1]);
-        CalcType y_value = y[i-1] + weight * (y[i] - y[i-1]);
-        return y_value;
+        }
+        CalcType weight = (xVal - x[i - 1]) / (x[i] - x[i - 1]);
+        CalcType yVal = y[i - 1] + weight * (y[i] - y[i - 1]);
+        return yVal;
     }
 
     CalcType IntegralRectangles()
@@ -681,7 +799,7 @@ public:
         return new_func;
     }
 
-    friend ostream& operator << (ostream& out, Function &f)
+    friend std::ostream& operator << (std::ostream& out, Function &f)
 	{
 		for(int i=0; i<f.size(); i++)
 			out << "X: " << f.x[i] << "   Y: " << f.y[i] << '\n';
@@ -693,7 +811,7 @@ public:
 //_________________VECTOR OF FUNCTION OF CALCULATION TYPE ON 1D, 2D OR 3D SPACE________________
 class VectorOfFunction
 {
-    vector<Function> vecoffunc;
+    std::vector<Function> vecoffunc;
 
 public:
     VectorOfFunction(int size=0) { vecoffunc.resize(size); }
@@ -709,21 +827,29 @@ public:
 //_____________SQUARE MATRIX OF FUNCTION OF CALCULATION TYPE ON 1D, 2D OR 3D SPACE_____________
 class MatrixOfFunction
 {
-    vector<vector<Function>> matoffunc;
+    std::vector<std::vector<Function>> matOfFunc;
 
 public:
-    MatrixOfFunction(int size=0)
+    MatrixOfFunction(int size = 0)
     {
-        matoffunc.resize(size);
+        matOfFunc.resize(size);
         for (int i=0; i<size; i++)
-            matoffunc.at(i).resize(size);
+        {
+            matOfFunc.at(i).resize(size);
+        }
     }
 
     //....................Returns numbers of rows & columns in Matrix of Function
-    int size() { return matoffunc.size(); }
+    int size() 
+    { 
+        return matOfFunc.size(); 
+    }
 
     //....................Matrix of Matrix indexing operator
-    Function& operator () (int row_index, int col_index) { return matoffunc.at(row_index).at(col_index); }
+    Function& operator () (int rowIndex, int colIndex) 
+    { 
+        return matOfFunc.at(rowIndex).at(colIndex); 
+    }
 };
 
 
@@ -731,98 +857,181 @@ public:
 Vector MatrixToVector(Matrix mat, bool symmetric=false)
 {
     Vector result;
-    for (int i=0; i<mat.size(); i++)
-        for (int j=symmetric?i:0; j<mat.size(); j++)
-            result.add(mat[i][j]);
+    if (symmetric)
+    {
+        for (int i=0; i<mat.size(); i++)
+        {
+            for (int j=i; j<mat.size(); j++)
+            {
+                result.add(mat[i][j]);
+            }
+        }
+    }
+    else
+    {
+        for (int i=0; i<mat.size(); i++)
+        {
+            for (int j=0; j<mat.size(); j++)
+            {
+                result.add(mat[i][j]);
+            }
+        }
+    }
     return result;
 }
 
-Vector MatrixOfMatrixToVector(MatrixOfMatrix mat_of_mat, bool symmetric=false)
+Vector MatrixOfMatrixToVector(MatrixOfMatrix matOfMat, bool symmetric=false)
 {
     Vector result;
-    for (int i=0; i<mat_of_mat.size(); i++)
-        for (int j=0; j<mat_of_mat.size(); j++)
-            for (int k=0; k<mat_of_mat(i, j).size(); k++)
-                for (int l=symmetric?k:0; l<mat_of_mat(i, j).size(); l++)
-                    result.add(mat_of_mat(i, j)[k][l]);
-    return result;
-}
-
-Matrix VectorToMatrix(Vector vec, int mat_size, bool symmetric=false)
-{
-    int size = mat_size * mat_size;
     if (symmetric)
-        for (int i=1; i<mat_size; i++)
-            size -= i;
-    assert (vec.size() == size);
-    
-    Matrix result(mat_size);
-    int index = 0;
-
-    for (int i=0; i<result.size(); i++)
     {
-        for (int j=symmetric?i:0; j<result.size(); j++)
+        for (int i=0; i<matOfMat.size(); i++)
         {
-            result[i][j] = vec[index];
-            if (symmetric)
-                result[j][i] = vec[index];
-            index++;
-        }
-    }
-    return result;
-}
-
-MatrixOfMatrix VectorToMatrixOfMatrix(Vector vec, int mat_of_mat_size, int mat_size, bool symmetric=false)
-{
-    int size = mat_size * mat_size;
-    if (symmetric)
-        for (int i=1; i<mat_size; i++)
-            size -= i;
-    size *= mat_of_mat_size * mat_of_mat_size;
-    assert (vec.size() == size);
-    
-    MatrixOfMatrix result(mat_of_mat_size);
-    int index = 0;
-
-    for (int i=0; i<result.size(); i++)
-    {
-        for (int j=0; j<result.size(); j++)
-        {
-            Matrix mat(mat_size);
-            for (int k=0; k<mat.size(); k++)
+            for (int j=0; j<matOfMat.size(); j++)
             {
-                for (int l=symmetric?k:0; l<mat.size(); l++)
+                for (int k=0; k<matOfMat(i, j).size(); k++)
                 {
-                    mat[k][l] = vec[index];
-                    if (symmetric)
-                        mat[l][k] = vec[index];
-                    index++;
+                    for (int l=k; l<matOfMat(i, j).size(); l++)
+                    {
+                        result.add(matOfMat(i, j)[k][l]);
+                    }
                 }
             }
-            result(i, j) = mat;
+        }
+    }
+    else
+    {
+        for (int i=0; i<matOfMat.size(); i++)
+        {
+            for (int j=0; j<matOfMat.size(); j++)
+            {
+                for (int k=0; k<matOfMat(i, j).size(); k++)
+                {
+                    for (int l=0; l<matOfMat(i, j).size(); l++)
+                    {
+                        result.add(matOfMat(i, j)[k][l]);
+                    }
+                }
+            }
         }
     }
     return result;
 }
 
-MatrixOfFunction VectorToMatrixOfFunction(Vector x_vec, Vector y_vec, int mat_of_func_size)
+Matrix VectorToMatrix(Vector vec, int matSize, bool symmetric=false)
 {
-    assert (y_vec.size() == mat_of_func_size * mat_of_func_size * x_vec.size());
-    MatrixOfFunction result(mat_of_func_size);
+    int totalSize = matSize * matSize;
+    if (symmetric)
+    {
+        for (int i=1; i<matSize; i++)
+        {
+            totalSize -= i;
+        }
+    }
+    assert (vec.size() == totalSize);
+    
+    Matrix result(matSize);
+    int index = 0;
+    if (symmetric)
+    {
+        for (int i=0; i<result.size(); i++)
+        {
+            for (int j=i; j<result.size(); j++)
+            {
+                result[i][j] = vec[index];
+                result[j][i] = vec[index];
+                index++;
+            }
+        }
+    }
+    else
+    {
+        for (int i=0; i<result.size(); i++)
+        {
+            for (int j=0; j<result.size(); j++)
+            {
+                result[i][j] = vec[index];
+                index++;
+            }
+        }
+    }
+    return result;
+}
+
+MatrixOfMatrix VectorToMatrixOfMatrix(Vector vec, int matOfMatSize, int matSize, bool symmetric=false)
+{
+    int totalSize = matSize * matSize;
+    if (symmetric)
+    {
+        for (int i=1; i<matSize; i++)
+        {
+            totalSize -= i;
+        }
+    }
+    totalSize *= matOfMatSize * matOfMatSize;
+    assert (vec.size() == totalSize);
+    
+    MatrixOfMatrix result(matOfMatSize);
+    Matrix mat(matSize);
+    int index = 0;
+    if (symmetric)
+    {
+        for (int i=0; i<result.size(); i++)
+        {
+            for (int j=0; j<result.size(); j++)
+            {
+                for (int k=0; k<mat.size(); k++)
+                {
+                    for (int l=k; l<mat.size(); l++)
+                    {
+                        mat[k][l] = vec[index];
+                        mat[l][k] = vec[index];
+                        index++;
+                    }
+                }
+                result(i, j) = mat;
+            }
+        }
+    }
+    else
+    {
+        for (int i=0; i<result.size(); i++)
+        {
+            for (int j=0; j<result.size(); j++)
+            {
+                for (int k=0; k<mat.size(); k++)
+                {
+                    for (int l=0; l<mat.size(); l++)
+                    {
+                        mat[k][l] = vec[index];
+                        index++;
+                    }
+                }
+                result(i, j) = mat;
+            }
+        }
+    }
+    return result;
+}
+
+MatrixOfFunction VectorToMatrixOfFunction(Vector xVec, Vector yVec, int matOfFuncSize)
+{
+    assert (yVec.size() == matOfFuncSize * matOfFuncSize * xVec.size());
+    MatrixOfFunction result(matOfFuncSize);
     int index = 0;
 
     for (int i=0; i<result.size(); i++)
     {
         for (int j=0; j<result.size(); j++)
         {
-            Vector y_values;
+            Vector yVals;
 
-            for (int k=0; k<x_vec.size(); k++)
+            for (int k=0; k<xVec.size(); k++)
             {
-                y_values.add(y_vec[index]);
+                yVals.add(yVec[index]);
                 index++;
             }
-            Function new_func(x_vec, y_values);
+            Function new_func(xVec, yVals);
             result(i, j) = new_func;
         }
     }
@@ -831,21 +1040,26 @@ MatrixOfFunction VectorToMatrixOfFunction(Vector x_vec, Vector y_vec, int mat_of
 
 bool IsSymmetric(Matrix mat)
 {
-    bool is_symmetric = true;
     for (int i=0; i<mat.size(); i++)
-        for (int j=0; j<mat.size(); j++)
+    {
+        for (int j=i; j<mat.size(); j++)
+        {
             if (mat[i][j] != mat[j][i])
-                is_symmetric = false;
-    return is_symmetric;
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 
 //________________________________________________TIME FROM CLOCK_T_________________________________________________
 class Time
 {
-    string str_seconds;
-    string str_minutes;
-    string str_hours;
+    std::string strSeconds;
+    std::string strMinutes;
+    std::string strHours;
 
 public:
     Time(clock_t time)
@@ -855,14 +1069,14 @@ public:
         int minutes = (seconds % 3600) / 60;
         seconds = seconds % 60;
 
-        str_seconds = seconds / 10 == 0 ? "0" + to_string(std::abs(seconds)) : to_string(std::abs(seconds));
-        str_minutes = minutes / 10 == 0 ? "0" + to_string(std::abs(minutes)) : to_string(std::abs(minutes));
-        str_hours = to_string(std::abs(hours));
+        strSeconds = seconds / 10 == 0 ? "0" + std::to_string(std::abs(seconds)) : std::to_string(std::abs(seconds));
+        strMinutes = minutes / 10 == 0 ? "0" + std::to_string(std::abs(minutes)) : std::to_string(std::abs(minutes));
+        strHours = std::to_string(std::abs(hours));
     }
 
-    friend ostream& operator << (ostream& out, const Time &t)
+    friend std::ostream& operator << (std::ostream& out, const Time &t)
 	{
-        out << t.str_hours << ':' << t.str_minutes << ':' << t.str_seconds;
+        out << t.strHours << ':' << t.strMinutes << ':' << t.strSeconds;
 		return out;
 	}
 };

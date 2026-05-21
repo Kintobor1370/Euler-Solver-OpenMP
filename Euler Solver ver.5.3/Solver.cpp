@@ -1,11 +1,8 @@
 #define NOMINMAX
 
 #include <iostream>
-#include <string>
-#include <cmath>
 #include <fstream>
 #include <sstream>
-#include <cassert>
 #include <time.h>
 #include <windows.h>
 #include <conio.h>
@@ -13,19 +10,27 @@
 
 #include "types.h"
 
-using namespace std;
-
 #define KEY_UP 72
 #define KEY_DOWN 80
 #define KEY_ENT 13
 #define KEY_ESC 27
 
-const CalcType PI = 3.1415927;
-const CalcType EPSILON = 1E-08;
+#define PI 3.1415927
 
-enum KernelType { Normal, };
+using namespace std;
 
-enum ExtrapolationType { Zero, SquaredN, Alpha, Exponential, };
+enum KernelType 
+{
+    Normal, 
+};
+
+enum ExtrapolationType 
+{ 
+    Zero, 
+    SquaredN, 
+    Alpha, 
+    Exponential, 
+};
 
 
 /**************************************************************************************************************************
@@ -66,11 +71,19 @@ struct Properties
         CalcType max_radius = std::max(sigma_w, sigma_m) * 5;
 
         int num_for_moments = 5;
-        auto moments_grid = Vector::abs(-Vector::log(-Vector::setLinSpaced(num_for_moments, 0, num_for_moments - 1) / num_for_moments + 1) * 0.01 * num_for_moments);
+        auto moments_grid = Vector::abs(
+            -Vector::log(
+                -Vector::setLinSpaced(num_for_moments, 0, num_for_moments - 1) / num_for_moments + 1
+            ) * 0.01 * num_for_moments
+        );
         while (moments_grid.last() < cutoff_distance - 0.01)
         {
             num_for_moments++;
-            moments_grid = Vector::abs(-Vector::log(-Vector::setLinSpaced(num_for_moments, 0, num_for_moments - 1) / num_for_moments + 1) * 0.01 * num_for_moments);
+            moments_grid = Vector::abs(
+                -Vector::log(
+                    -Vector::setLinSpaced(num_for_moments, 0, num_for_moments - 1) / num_for_moments + 1
+                ) * 0.01 * num_for_moments
+            );
         }
         CalcType parameter = cutoff_distance / moments_grid.last();
         moments_grid = moments_grid * parameter;
@@ -123,20 +136,31 @@ struct Properties
                             break;
                     }
                     if (kernel_values[x][y] != 0)
+                    {
                         max_non_zero_num = std::max({max_non_zero_num, x+1, y+1});
+                    }
                 }
                 else kernel_values[x][y] = 0;
             }
         }
-        if (grid.size() % 2 == 1 && max_non_zero_num % 2 == 0 && max_non_zero_num != 2) max_non_zero_num++;
-        if (max_non_zero_num == 1) max_non_zero_num = 2;
+        if (grid.size() % 2 == 1 && max_non_zero_num % 2 == 0 && max_non_zero_num != 2)
+        {
+            max_non_zero_num++;
+        }
+        if (max_non_zero_num == 1)
+        {
+            max_non_zero_num = 2;
+        }
 
         // Renormalize
         CalcType integral = 0;
         for (int x=1-max_non_zero_num; x<max_non_zero_num-1; x+=2)
+        {
             for (int y=1-max_non_zero_num; y<max_non_zero_num-1; y+=2)
+            {
                 integral += kernel_values[abs(x + 1)][abs(y + 1)];
-        
+            }
+        }
         assert (integral != 0);
         integral *= step * step;
         kernel_values = kernel_values / integral;
@@ -155,9 +179,12 @@ struct Properties
                 
                 CalcType integral = 0;
                 for (int x=1-MaxNumForW[i][j]; x<MaxNumForW[i][j]-1; x+=2)
+                {
                     for (int y=1-MaxNumForW[i][j]; y<MaxNumForW[i][j]-1; y+=2)
+                    {
                         integral += W(i, j)[abs(x + 1)][abs(y + 1)];
-                
+                    }
+                }
                 integral *= std::pow(KernelsGridStep, 2);
                 cout << integral;
                 assert (std::abs(integral - 1) < EPSILON);
@@ -171,9 +198,12 @@ struct Properties
                 
             CalcType integral = 0;
             for (int x=1-MaxNumForM[i]; x<MaxNumForM[i]-1; x+=2)
+            {
                 for (int y=1-MaxNumForM[i]; y<MaxNumForM[i]-1; y+=2)
+                {
                     integral += M(i)[abs(x + 1)][abs(y + 1)];
-                
+                }
+            }
             integral *= std::pow(KernelsGridStep, 2);
             cout << integral;
             assert (std::abs(integral - 1) < EPSILON);
@@ -207,8 +237,9 @@ struct Properties
         
         Matrix max_radius_W;
         if (w_type == Normal)
+        {
             max_radius_W = sW * 3;
-        
+        }
         for (int i=0; i<num; i++)
         {
             for (int j=0; j<num; j++)
@@ -224,8 +255,9 @@ struct Properties
         
         Vector max_radius_M;
         if (m_type == Normal)
+        {
             max_radius_M = sM * 3;
-
+        }
         for (int i=0; i<num; i++)
         {
             auto kernel_M = props.GenerateKernel(sM[i], max_radius_M[i], m_type);
@@ -540,55 +572,62 @@ struct SolverResults
 //___________________________________________________EULER METHOD SOLVER___________________________________________________
 class EulerSolver
 {
-    SolverResults solver_results;
+    SolverResults results;
 
 private:
-    void Add(Vector value, CalcType time)
+    void add(Vector value, CalcType time)
     {
-        solver_results.Values.emplace_back(std::move(value));
-        solver_results.Times.add(time);
+        results.Values.emplace_back(std::move(value));
+        results.Times.add(time);
     }
 
-    void AddDerivative(Vector derivative)
-    { solver_results.Derivatives.emplace_back(std::move(derivative)); }
+    void addDerivative(Vector derivative)
+    { 
+        results.Derivatives.emplace_back(std::move(derivative)); 
+    }
 
 public:
     // Solve given equation numericaly for fixed amount of iterations
     SolverResults Solve(
-        Equation current_equation,
+        Equation currEquation,
         ExtrapolationType type,
-        CalcType time_max,
+        CalcType timeMax,
         CalcType step,
-        Vector initial_value,
+        Vector valInit,
         bool debug_print_enabled = false
     ) {
         CalcType time = 0;
-        Vector value = initial_value;
-        Vector derivative = current_equation(time, value, type);
+        Vector value = valInit;
+        Vector derivative = currEquation(time, value, type);
 
-        Add(value, time);
-        AddDerivative(derivative);
+        add(value, time);
+        addDerivative(derivative);
         if (debug_print_enabled)
-                cout << "   t = " << time << ";   N = " << value.first() << '\n';
-        
+        {
+            cout << "   t = " << time << ";   N = " << value.first() << '\n';
+        }
         time += step;
-        while (time < time_max)
+        while (time < timeMax)
         {
             value = value + derivative * step;
             for (auto& val : value)
+            {
                 if (val < 0)
+                {
                     val = 0;
-            Add(value, time);
-            derivative = current_equation(time, value, type);
-            AddDerivative(derivative);
+                }
+            }
+            add(value, time);
+            derivative = currEquation(time, value, type);
+            addDerivative(derivative);
             
             if (debug_print_enabled)
+            {
                 cout << "   t = " << time << ";   N = " << value.first() << '\n';
-
+            }
             time += step;
         }
-    
-        return solver_results;
+        return results;
     }
 };
 
@@ -596,60 +635,67 @@ public:
 //________________________________________________RUNGE-KUTTA 4 METHOD SOLVER_______________________________________________
 class RungeKutta4thSolver
 {
-    SolverResults solver_results;
+    SolverResults results;
 
 private:
-    void Add(Vector value, CalcType time)
+    void add(Vector value, CalcType time)
     {
-        solver_results.Values.emplace_back(std::move(value));
-        solver_results.Times.add(time);
+        results.Values.emplace_back(std::move(value));
+        results.Times.add(time);
     }
 
-    void AddDerivative(Vector derivative)
-    { solver_results.Derivatives.emplace_back(std::move(derivative)); }
+    void addDerivative(Vector derivative)
+    { 
+        results.Derivatives.emplace_back(std::move(derivative)); 
+    }
 
 public:
     // Solve given equation numericaly for fixed amount of iterations
     SolverResults Solve(
-        Equation current_equation,
+        Equation currEquation,
         ExtrapolationType type,
-        CalcType time_max,
+        CalcType timeMax,
         CalcType step,
-        Vector initial_value,
+        Vector valInit,
         bool debug_print_enabled = false
     ) {
         CalcType time = 0;
-        Vector value = initial_value;
+        Vector value = valInit;
         
-        solver_results.clear();
-        Add(value, time);
-        while (time < time_max)
+        results.clear();
+        add(value, time);
+        while (time < timeMax)
         {
-            AddDerivative(current_equation(time, value, type));
+            addDerivative(currEquation(time, value, type));
             
-            Vector c_0 = current_equation(time, value, type);
+            Vector c0 = currEquation(time, value, type);
             time += step / 2;
-            Vector c_1 = current_equation(time, value + (c_0 * step / 2), type);
-            Vector c_2 = current_equation(time, value + (c_1 * step / 2), type);
+            Vector c1 = currEquation(time, value + (c0 * step / 2), type);
+            Vector c2 = currEquation(time, value + (c1 * step / 2), type);
             time += step / 2;
-            Vector c_3 = current_equation(time, value + (c_2 * step), type);
-            Vector c = c_0;
-            c = c + (c_1 * 2);
-            c = c + (c_2 * 2);
-            c = c + c_3;
+            Vector c3 = currEquation(time, value + (c2 * step), type);
+            Vector c = c0;
+            c = c + (c1 * 2);
+            c = c + (c2 * 2);
+            c = c + c3;
             value = value + (c * step / 6);
 
             for (auto& val : value)
+            {
                 if (val < 0)
+                {
                     val = 0;
-            Add(value, time);
+                }
+            }
+            add(value, time);
 
             if (debug_print_enabled)
+            {
                 cout << "   t = " << time << ";   N = " << value.first() << '\n';
+            }
         }
-
-        AddDerivative(current_equation(time, value, type));
-        return solver_results;
+        addDerivative(currEquation(time, value, type));
+        return results;
     }
 };
 
@@ -876,13 +922,12 @@ class Experiments
 private:
     // Comparator for sorting vector of Solver Results
     static bool SortBySigma(const pair<CalcType, SolverResults> &a, const pair<CalcType, SolverResults> &b)
-    { return (a.first < b.first); }
-
-    static bool SortByFirst(const pair<CalcType, CalcType> &a, const pair<CalcType, CalcType> &b)
-    { return (a.first < b.first); }
+    { 
+        return (a.first < b.first); 
+    }
 
     // Calculate first moment
-    SolverResults CalculateFirstMoment(CalcType t_max, ExtrapolationType type=SquaredN)
+    SolverResults CalculateFirstMoment(CalcType tMax, ExtrapolationType type = SquaredN, CalcType step = 0.1)
     {
         PropsVector.clear();
         FileReader Reader(reader_file_path);
@@ -892,181 +937,208 @@ private:
         EulerSolver solver;
 
         cout << "\n==========================CALCULATIONS START==========================\n";
-        clock_t Start = clock();
-        
-        auto solver_results = solver.Solve(equation, type, t_max, 0.1, equation.GenerateEquilibriumValuesForNAndC(200), enable_debug_print=true);
-        
-        clock_t End = clock();
+        clock_t clockStart = clock();
+        auto solverResults = solver.Solve(
+            equation, 
+            type, 
+            tMax, 
+            step, 
+            equation.GenerateEquilibriumValuesForNAndC(200), 
+            enable_debug_print=true
+        );
+        clock_t clockEnd = clock();
         cout << "\n===========================CALCULATIONS END===========================\n";
         
-        Time calculation_time(End - Start);
-        cout << "TIME:  " << calculation_time << '\n';
-
-        return solver_results;
+        Time calcTime(clockEnd - clockStart);
+        cout << "TIME:  " << calcTime << '\n';
+        return solverResults;
     }
 
     // Calculate first moment with varying sigma (sM or sW)
-    vector<SolverResults> CalculateWithVaryingSigma(CalcType t_max, char SigmaType, Vector SigmaVec, ExtrapolationType type=SquaredN)
-    {
-        vector<pair<CalcType, SolverResults>> SigmasAndResults;
+    vector<SolverResults> CalculateWithVaryingSigma(
+        CalcType tMax, 
+        char sigmaType, 
+        Vector sigmaVec, 
+        ExtrapolationType type=SquaredN, 
+        CalcType step=0.1
+    ) {
+        map<CalcType, SolverResults> sigmasAndResults;
         
         PropsVector.clear();
-        for (int i=0; i<SigmaVec.size(); i++)
+        for (int i=0; i<sigmaVec.size(); i++)
         {
             FileReader Reader(reader_file_path);
             cout << "ENTRY " << i << ":\n";
-            switch(SigmaType)
+            switch (sigmaType)
             {
                 case 'W':
-                    PropsVector.push_back(Reader.GetWithoutSigmaW(SigmaVec[i], enable_debug_print=true));
+                    PropsVector.push_back(Reader.GetWithoutSigmaW(sigmaVec[i], enable_debug_print=true));
                     break;
                 case 'M':
-                    PropsVector.push_back(Reader.GetWithoutSigmaM(SigmaVec[i], enable_debug_print=true));
+                    PropsVector.push_back(Reader.GetWithoutSigmaM(sigmaVec[i], enable_debug_print=true));
                     break;
                 default:
                     cout << "===============================ERROR!!================================\n" << endl;
                     break;
             }
         }
-        assert (PropsVector.size() == SigmaVec.size());
+        assert (PropsVector.size() == sigmaVec.size());
 
-        int done_iterations = 0;
-        omp_lock_t print_lock;
-        omp_init_lock(&print_lock);
+        int finishedIterations = 0;
+        omp_lock_t printLock;
+        omp_lock_t sigmaLock();
+        omp_init_lock(&printLock);
+        omp_init_lock(&sigmaLock);
 
         cout << "\n==========================CALCULATIONS START==========================\n";
-        clock_t Start = clock();
+        clock_t clockStart = clock();
 
-        #pragma omp parallel for default(none) shared(type, t_max, SigmaVec, SigmasAndResults, print_lock, done_iterations, cout)
-        for (int i=0; i<SigmaVec.size(); i++)
+        #pragma omp parallel for default(none) shared(type, tMax, step, sigmaType, sigmaVec, sigmasAndResults, printLock, sigmaLock, finishedIterations, cout)
+        for (int i=0; i<sigmaVec.size(); i++)
         {
-            auto thread_num = omp_get_thread_num();
+            auto threadNum = omp_get_thread_num();
 
-            omp_set_lock(&print_lock);
-            cout << (int) (done_iterations * 100 / SigmaVec.size()) << "%    THREAD " << thread_num << ":     ENTRY " << i << ": START\n";
-            omp_unset_lock(&print_lock);
+            omp_set_lock(&printLock);
+            cout << (int) (finishedIterations * 100 / sigmaVec.size()) 
+                 << "%    THREAD " << threadNum << ":     ENTRY " << i << ": START\n";
+            omp_unset_lock(&printLock);
             
-            auto new_props = PropsVector.at(i);
-            Equation equation(new_props);
+            auto newProps = PropsVector.at(i);
+            Equation equation(newProps);
             EulerSolver solver;
 
-            auto new_result = solver.Solve(equation, type, t_max, 0.1, equation.GenerateEquilibriumValuesForNAndC(200), enable_debug_print=false);
-            SigmasAndResults.push_back(make_pair(SigmaVec[i], new_result));
+            auto newResult = solver.Solve(
+                equation, 
+                type, 
+                tMax, 
+                step, 
+                equation.GenerateEquilibriumValuesForNAndC(200), 
+                enable_debug_print=false
+            );
+            sigmasAndResults.insert({ sigmaVec[i], newResult });
             
-            done_iterations++;
-            CalcType N = new_result.Values.at(new_result.Values.size() - 1).first();
+            finishedIterations++;
+            CalcType N = newResult.Values.at(newResult.Values.size() - 1).first();
             
-            omp_set_lock(&print_lock);
-            cout << (int) (done_iterations * 100 / SigmaVec.size()) << "%    THREAD " << thread_num << ":     ENTRY " << i <<
-                 ": FINISH    sigma = " << SigmaVec[i] << ";  N = " << N << '\n';
-            omp_unset_lock(&print_lock);
+            omp_set_lock(&printLock);
+            cout << (int) (finishedIterations * 100 / sigmaVec.size()) 
+                 << "%    THREAD " << threadNum << ":     ENTRY " << i 
+                 << ": FINISH    sigma " << sigmaType << " = " << sigmaVec[i] << ";  N = " << N << '\n';
+            omp_unset_lock(&printLock);
         }
-        clock_t End = clock();
+        clock_t clockEnd = clock();
         cout << "\n===========================CALCULATIONS END===========================\n";
         
-        omp_destroy_lock(&print_lock);
-        Time calculation_time(End - Start);
-        cout << "TIME:  " << calculation_time << '\n';
+        omp_destroy_lock(&printLock);
+        Time calcTime(clockEnd - clockStart);
+        cout << "TIME:  " << calcTime << endl;
 
-        assert (PropsVector.size() == SigmasAndResults.size());
-        sort(SigmasAndResults.begin(), SigmasAndResults.end(), SortBySigma);
+        assert (PropsVector.size() == sigmasAndResults.size());
         vector<SolverResults> results;
-        for (auto result : SigmasAndResults)
+        for (auto result : sigmasAndResults)
+        {
             results.push_back(result.second);
+        }
         return results;
     }
 
     // Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-    void Visualise_Windows() { WinExec("python Visualiser.py", 1); }
+    void Visualise_Windows()
+    { 
+        WinExec("python Visualiser.py", 1);
+    }
 
 public:
     Experiments() : visdata_path("Data\\VisData.csv") {}
 
-    ~Experiments() { PropsVector.clear(); }
+    ~Experiments()
+    { 
+        PropsVector.clear();
+    }
 
     void Experiment_14_4(int input_data)
     {
-        string plot_title;
+        string plotTitle;
         switch(input_data)
         {
             case 0:
                 reader_file_path = "Data\\14\\4\\a.csv";
-                plot_title = "(a)";
+                plotTitle = "(a)";
                 break;
             case 1:
                 reader_file_path = "Data\\14\\4\\b.csv";
-                plot_title = "(b)";
+                plotTitle = "(b)";
                 break;
             case 2:
                 reader_file_path = "Data\\14\\4\\c.csv";
-                plot_title = "(c)";
+                plotTitle = "(c)";
                 break;
         }
-        auto solver_results = CalculateFirstMoment(100);
+        auto solverResults = CalculateFirstMoment(100);
     
         Vector N;
         Vector CSquareRoot;
-        for (auto Values : solver_results.Values)
+        for (auto Values : solverResults.Values)
         {
-            CalcType N_value = Values.first();
-            N.add(N_value);
+            CalcType NVal = Values.first();
+            N.add(NVal);
             
-            CalcType C_at_cutoff_distance = Values[Props.MomentsGrid.size()];
-            CSquareRoot.add(std::sqrt(C_at_cutoff_distance));
+            CalcType CAtCutoffDistance = Values[Props.MomentsGrid.size()];
+            CSquareRoot.add(std::sqrt(CAtCutoffDistance));
         }
 
-        vector<Vector> plot_points;
-        plot_points.push_back(solver_results.Times);
-        plot_points.push_back(N);
-        plot_points.push_back(CSquareRoot);
-
-        vector<string> plot_labels;
-        plot_labels.push_back("Time");
-        plot_labels.push_back("N");
-        plot_labels.push_back("Square root of C at cutoff distance");
-
+        vector<Vector> plotPoints = { 
+            solverResults.Times, 
+            N, 
+            CSquareRoot 
+        };
+        vector<string> plotLabels = { 
+            "Time", 
+            "N", 
+            "Square root of C at cutoff distance" 
+        };
         FileWriter VisData(visdata_path);
-        VisData.WritePlotData("14.4", plot_title, plot_labels, plot_points);
+        VisData.WritePlotData("14.4", plotTitle, plotLabels, plotPoints);
         Visualise_Windows();
     }
 
-    void Experiment_14_6(char SigmaType, string RadiusType)
+    void Experiment_14_6(char sigmaType, string radiusType)
     {
         reader_file_path = "Data\\14\\6\\a.csv";
-        string plot_title = "(a)";
-        if(SigmaType == 'M')
+        string plotTitle = "(a)";
+        if(sigmaType == 'M')
         {
             reader_file_path = "Data\\14\\6\\b.csv";
-            plot_title = "(b)";
+            plotTitle = "(b)";
         }
-        auto SigmaVec = Vector::setLinSpaced(160, EPSILON, 0.2);
-        auto solver_results = CalculateWithVaryingSigma(200, SigmaType, SigmaVec);
+        auto sigmaVec = Vector::setLinSpaced(160, EPSILON, 0.2);
+        auto solverResults = CalculateWithVaryingSigma(200, sigmaType, sigmaVec);
         
-        Vector ConvergedN;
-        Vector ConvergedCSquareRoot;
+        Vector convergedN;
+        Vector convergedCSquareRoot;
         for (int i=0; i<PropsVector.size(); i++)
         {
-            auto values = solver_results.at(i).Values;
-            auto converged_N_and_C = values.at(values.size() - 1);
-            CalcType converged_N_value = converged_N_and_C.first();
-            ConvergedN.add(converged_N_value);
+            auto values = solverResults.at(i).Values;
+            auto convergedNAndC = values.at(values.size() - 1);
+            CalcType convergedNVal = convergedNAndC.first();
+            convergedN.add(convergedNVal);
 
-            CalcType converged_C_at_cutoff_distance = converged_N_and_C[PropsVector[i].MomentsGrid.size()];
-            ConvergedCSquareRoot.add(std::sqrt(converged_C_at_cutoff_distance));
+            CalcType convergedCAtCutoffDistance = convergedNAndC[PropsVector[i].MomentsGrid.size()];
+            convergedCSquareRoot.add(std::sqrt(convergedCAtCutoffDistance));
         }
 
-        vector<Vector> plot_points;
-        plot_points.push_back(SigmaVec);
-        plot_points.push_back(ConvergedN);
-        plot_points.push_back(ConvergedCSquareRoot);
-
-        vector<string> plot_labels;
-        plot_labels.push_back(RadiusType);
-        plot_labels.push_back("Equilibrium density");
-        plot_labels.push_back("Square root of C at cutoff distance");
-        
+        vector<Vector> plotPoints = { 
+            sigmaVec, 
+            convergedN, 
+            convergedCSquareRoot 
+        };
+        vector<string> plotLabels = { 
+            radiusType, 
+            "Equilibrium density", 
+            "Square root of C at cutoff distance" 
+        };
         FileWriter VisData(visdata_path);
-        VisData.WritePlotData("14.6", plot_title, plot_labels, plot_points);
+        VisData.WritePlotData("14.6", plotTitle, plotLabels, plotPoints);
         Visualise_Windows();
     }
 
@@ -1074,7 +1146,7 @@ public:
     {
         reader_file_path = "Data\\Custom\\experiment.csv";
         string plot_title = "My experiment";
-        auto solver_results = CalculateFirstMoment(100);
+        auto solver_results = CalculateFirstMoment(50, SquaredN, 0.5);
     
         Vector N;
         Vector CSquareRoot;
@@ -1126,36 +1198,39 @@ public:
                 break;
         }
     
-        vector<pair<CalcType, CalcType>> result;
-        bool unique;
+        map<CalcType, CalcType> result;
+        bool isUnique;
 
         for (int x=0; x<Props.KernelsGrid.size(); x++)
         {
             for (int y=0; y<Props.KernelsGrid.size(); y++)
             {
-                unique = true;
+                isUnique = true;
                 CalcType r = std::hypot(Props.KernelsGrid[x], Props.KernelsGrid[y]);
                 for (auto item : result)
                 {
                     //cout << "x = " << Props.KernelsGrid[x] << "    y = " << Props.KernelsGrid[y] << "     r = " << r << "    kernel = " << kernel[x][y] << '\n';
                     if (r == item.first)
-                        unique = false;
+                    {
+                        isUnique = false;
+                    }
                 }
-                if (unique)
-                    result.push_back(make_pair(r, kernel[x][y]));
+                if (isUnique)
+                {
+                    result.insert({ r, kernel[x][y] });
+                }
             }
         }
-        sort(result.begin(), result.end(), SortByFirst);
 
-        vector<CalcType> xValues;
-        vector<CalcType> yValues;
+        vector<CalcType> xVals;
+        vector<CalcType> yVals;
         for (auto item : result)
         {
-            xValues.push_back(item.first);
-            yValues.push_back(item.second);
+            xVals.push_back(item.first);
+            yVals.push_back(item.second);
         }
         
-        switch(KernelSymbol)
+        switch (KernelSymbol)
         {
             case 'W':
                 cout << "MAX NON-ZERO NUMBERS: " << Props.MaxNumForW << '\n';
@@ -1170,16 +1245,10 @@ public:
                 break;
         }
 
-        vector<Vector> kernel_plot_points;
-        kernel_plot_points.push_back(xValues);
-        kernel_plot_points.push_back(yValues);
-
-        vector<string> kernel_plot_labels;
-        kernel_plot_labels.push_back("r");
-        kernel_plot_labels.push_back("distribution");
-
+        vector<Vector> plotPoints = { xVals, yVals };
+        vector<string> plotLabels = { "r", "distribution" };
         FileWriter VisData(visdata_path);
-        VisData.WritePlotData("1", title, kernel_plot_labels, kernel_plot_points);
+        VisData.WritePlotData("1", title, plotLabels, plotPoints);
         Visualise_Windows();
     }
 };
