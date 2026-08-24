@@ -3,17 +3,11 @@ Solver for integral-differential equations for first and second spatial moments 
 These programs carry out experiments 14.4 and 14.6 (LawDieckmann200a.pdf: pages 13, 17)
 \
 \
-_Tested on Windows 10._
+Compatible with Windows 11
 \
 \
-To execute the code:
+To run the solver:
 
-1. Launch the command prompt from the folder containing the programs.
-2. Input the following lines:
-```
-g++ Solver.cpp -fopenmp -O3
-```
-```
-a.exe
-```
-3. Select an experiment.
+1. Download the latest release from the "Releases" section
+2. Run `Solver.exe`
+3. Select an experiment

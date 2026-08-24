@@ -1,0 +1,57 @@
+#pragma once
+
+#include "Vector.hpp"
+#include "Properties.hpp"
+#include "Equation.hpp"
+#include "Solver.hpp"
+
+
+//_____________________________________________________EXPERIMENTS_________________________________________________________
+class Experiments
+{
+    Properties Props;
+    std::vector<Properties> PropsVector;
+    std::string file_path_prefix;
+    std::string reader_file_path;
+    std::string visdata_path;
+    bool enable_debug_print;
+
+private:
+    // Comparator for sorting vector of Solver Results
+    static bool SortBySigma(
+        const std::pair<CalcType, SolverResults> &a, 
+        const std::pair<CalcType, SolverResults> &b
+    );
+
+    // Calculate first moment
+    SolverResults CalculateFirstMoment(
+        CalcType tMax, 
+        ExtrapolationType type = SquaredN, 
+        CalcType step = 0.1
+    );
+
+    // Calculate first moment with varying sigma (sM or sW)
+    std::vector<SolverResults> CalculateWithVaryingSigma(
+        CalcType tMax, 
+        char sigmaType, 
+        Vector sigmaVec, 
+        ExtrapolationType type=SquaredN, 
+        CalcType step = 0.1
+    );
+
+    // Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
+    void Visualise_Windows();
+
+public:
+    Experiments();
+
+    ~Experiments();
+
+    void Experiment_14_4(int input_data);
+
+    void Experiment_14_6(char sigmaType, std::string radiusType);
+
+    void Custom_Experiment();
+
+    void KernelTest(char KernelSymbol, std::string case_str);
+};
