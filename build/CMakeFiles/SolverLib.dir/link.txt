@@ -1,2 +1,0 @@
-C:\MinGW\bin\ar.exe qc libSolverLib.a CMakeFiles/SolverLib.dir/src/Solver/Properties.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/Equation.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/Solver.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/FileReader.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/FileWriter.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/Experiments.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/IOHandler.cpp.obj CMakeFiles/SolverLib.dir/src/Solver/UI.cpp.obj
-C:\MinGW\bin\ranlib.exe libSolverLib.a
