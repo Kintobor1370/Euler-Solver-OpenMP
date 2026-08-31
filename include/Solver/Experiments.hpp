@@ -39,8 +39,8 @@ private:
         CalcType step = 0.1
     );
 
-    // Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-    void Visualise_Windows();
+    // Run Visualiser.py
+    void RunVisualiser();
 
 public:
     Experiments();

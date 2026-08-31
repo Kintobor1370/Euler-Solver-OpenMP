@@ -5,8 +5,6 @@
 #include <map>
 #include <cassert>
 #include <time.h>
-#include <windows.h>
-#include <conio.h>
 #include <omp.h>
 #include "Matrix.hpp"
 #include "Time.hpp"
@@ -146,9 +144,9 @@ vector<SolverResults> Experiments::CalculateWithVaryingSigma(
 }
 
 // Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-void Experiments::Visualise_Windows()
+void Experiments::RunVisualiser()
 { 
-    WinExec("python ..\\Visualiser.py", 1);
+    system("python ..\\Visualiser.py");
 }
 
 Experiments::Experiments()
@@ -207,7 +205,7 @@ void Experiments::Experiment_14_4(int input_data)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("14.4", plotTitle, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::Experiment_14_6(char sigmaType, string radiusType)
@@ -247,7 +245,7 @@ void Experiments::Experiment_14_6(char sigmaType, string radiusType)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("14.6", plotTitle, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::Custom_Experiment()
@@ -279,7 +277,7 @@ void Experiments::Custom_Experiment()
 
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("1", plot_title, plot_labels, plot_points);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::KernelTest(char KernelSymbol, string case_str)
@@ -369,5 +367,5 @@ void Experiments::KernelTest(char KernelSymbol, string case_str)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("1", title, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }
