@@ -1,0 +1,8 @@
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/TypesLib.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/SolverLib.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/Main.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/TestVector.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/TestMatrix.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/test.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/edit_cache.dir
+C:/Users/leona/Desktop/projects/Euler-Solver-OpenMP/build/CMakeFiles/rebuild_cache.dir

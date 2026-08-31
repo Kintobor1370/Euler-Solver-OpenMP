@@ -40,11 +40,7 @@ private:
         CalcType step = 0.1
     );
 
-<<<<<<< HEAD
-    // Run Visualiser.py
-=======
     // Run visualisation script
->>>>>>> 076b2183d309fa3090126b9ba8e103745fcfa629
     void RunVisualiser();
 
 public:

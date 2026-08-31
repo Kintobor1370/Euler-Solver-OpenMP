@@ -86,7 +86,9 @@ void IOHandler::ClearWindow()
 
 void IOHandler::ResetCursor()
 {
-    #ifndef _WIN32
+    #ifdef _WIN32
+        system("cls");
+    #else
         move(initX, initY);
         mvwprintw(win, initX, initY, "");
     #endif
@@ -94,7 +96,9 @@ void IOHandler::ResetCursor()
 
 void IOHandler::EndWindow()
 {
-    #ifndef _WIN32
+    #ifdef _WIN32
+        system("cls");
+    #else
         endwin();
     #endif
 }

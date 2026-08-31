@@ -32,10 +32,6 @@ private:
     const std::string HINT_MSG = "\n(Navigate with up arrow & down arrow\n Press ENTER to confirm\n Press ESC to quit)\n";
     const std::string CUSTOM_HINT_MSG = "Please navigate to \'Data\\Custom\' folder and fill the \'experiment.csv\' file according to the example.\nPress ENTER to confirm and start the experiment\nPress ESC to quit\n";
 
-    void InitialiseWindow();
-    
-    void ClearWindow();
-
     void DisplayMenu();
 
     void GoUp();

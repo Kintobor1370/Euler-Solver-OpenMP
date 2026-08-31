@@ -12,29 +12,6 @@ using namespace std;
 
 
 //____________________________________________________USER INTERFACE_______________________________________________________
-void UserInterface::InitialiseWindow()
-{
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-        initscr();
-        noecho();
-        cbreak();
-        keypad(stdscr, true);
-    #endif
-}
-
-void UserInterface::ClearWindow()
-{
-    #ifdef _WIN32
-        system("cls");
-    #else
-        endwin();
-        system("clear");
-    #endif
-}
-
 void UserInterface::DisplayMenu()
 {
     string menuStr = GREETINGS_MSG + menu[currentIndex] + HINT_MSG;

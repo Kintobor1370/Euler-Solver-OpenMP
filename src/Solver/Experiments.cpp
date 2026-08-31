@@ -155,18 +155,11 @@ vector<SolverResults> Experiments::CalculateWithVaryingSigma(
     return results;
 }
 
-<<<<<<< HEAD
-// Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-void Experiments::RunVisualiser()
-{ 
-    system("python ..\\Visualiser.py");
-=======
 // Run visualisation script
 void Experiments::RunVisualiser()
 { 
     string visCommand = "python3 .." + file_path_separator + "Visualiser.py";
     system(visCommand.c_str());
->>>>>>> 076b2183d309fa3090126b9ba8e103745fcfa629
 }
 
 Experiments::Experiments()
