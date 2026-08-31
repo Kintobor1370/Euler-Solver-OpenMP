@@ -8,8 +8,10 @@ using namespace std;
 
 
 //..............................GENERATE GRIDS FOR KERNELS AND PAIR DENSITIES
-void Properties::GenerateGrids(CalcType sigma_w, CalcType sigma_m)
-{
+void Properties::GenerateGrids(
+    CalcType sigma_w, 
+    CalcType sigma_m
+) {
     CalcType cutoff_distance = (sigma_w + sigma_m) * 5;
     CalcType max_radius = std::max(sigma_w, sigma_m) * 5;
 

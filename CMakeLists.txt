@@ -6,6 +6,10 @@ project(Euler-Solver-OpenMP
 )
 
 find_package(OpenMP REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS 
+    Interpreter 
+    Development
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,6 +33,7 @@ add_library(SolverLib
     src/Solver/FileReader.cpp
     src/Solver/FileWriter.cpp
     src/Solver/Experiments.cpp
+    src/Solver/IOHandler.cpp
     src/Solver/UI.cpp
 )
 
@@ -48,6 +53,13 @@ target_link_libraries(SolverLib
     PRIVATE 
         OpenMP::OpenMP_CXX
 )
+
+if(UNIX)
+    target_link_libraries(SolverLib
+        PUBLIC
+            ncurses
+    )
+endif()
 
 add_executable(Main
     src/main.cpp

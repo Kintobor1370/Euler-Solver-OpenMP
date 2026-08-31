@@ -151,8 +151,10 @@ Properties FileReader::GetProperties(bool debug_print_enabled)
     return properties;
 }
 
-Properties FileReader::GetWithoutSigmaW(CalcType sigmaW, bool debug_print_enabled)
-{
+Properties FileReader::GetWithoutSigmaW(
+    CalcType sigmaW, 
+    bool debug_print_enabled
+) {
     file.open(filename);
 
     int species = GetInt();
@@ -177,8 +179,10 @@ Properties FileReader::GetWithoutSigmaW(CalcType sigmaW, bool debug_print_enable
     return properties;
 }
 
-Properties FileReader::GetWithoutSigmaM(CalcType sigmaM, bool debug_print_enabled)
-{
+Properties FileReader::GetWithoutSigmaM(
+    CalcType sigmaM, 
+    bool debug_print_enabled
+) {
     file.open(filename);
 
     int species = GetInt();

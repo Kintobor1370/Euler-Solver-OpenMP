@@ -33,7 +33,13 @@ public:
 
     Properties GetProperties(bool debug_print_enabled = false);
 
-    Properties GetWithoutSigmaW(CalcType sigmaW, bool debug_print_enabled = false);
+    Properties GetWithoutSigmaW(
+        CalcType sigmaW, 
+        bool debug_print_enabled = false
+    );
 
-    Properties GetWithoutSigmaM(CalcType sigmaM, bool debug_print_enabled = false);
+    Properties GetWithoutSigmaM(
+        CalcType sigmaM, 
+        bool debug_print_enabled = false
+    );
 };
