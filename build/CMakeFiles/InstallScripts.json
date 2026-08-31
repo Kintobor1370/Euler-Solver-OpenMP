@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/vboxuser/Desktop/Euler-Solver-OpenMP/build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libTypesLib.a CMakeFiles/TypesLib.dir/src/Types/Vector.cpp.o CMakeFiles/TypesLib.dir/src/Types/Matrix.cpp.o CMakeFiles/TypesLib.dir/src/Types/VectorOfMatrix.cpp.o CMakeFiles/TypesLib.dir/src/Types/MatrixOfMatrix.cpp.o CMakeFiles/TypesLib.dir/src/Types/Function.cpp.o CMakeFiles/TypesLib.dir/src/Types/VectorOfFunction.cpp.o CMakeFiles/TypesLib.dir/src/Types/MatrixOfFunction.cpp.o CMakeFiles/TypesLib.dir/src/Types/Conversion.cpp.o CMakeFiles/TypesLib.dir/src/Types/Time.cpp.o
-/usr/bin/ranlib libTypesLib.a
