@@ -12,6 +12,7 @@ class Experiments
     Properties Props;
     std::vector<Properties> PropsVector;
     std::string file_path_prefix;
+    std::string file_path_separator;
     std::string reader_file_path;
     std::string visdata_path;
     bool enable_debug_print;
@@ -39,8 +40,8 @@ private:
         CalcType step = 0.1
     );
 
-    // Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-    void Visualise_Windows();
+    // Run visualisation script
+    void RunVisualiser();
 
 public:
     Experiments();

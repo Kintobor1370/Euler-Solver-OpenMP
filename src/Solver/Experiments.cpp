@@ -5,8 +5,6 @@
 #include <map>
 #include <cassert>
 #include <time.h>
-#include <windows.h>
-#include <conio.h>
 #include <omp.h>
 #include "Matrix.hpp"
 #include "Time.hpp"
@@ -75,11 +73,23 @@ vector<SolverResults> Experiments::CalculateWithVaryingSigma(
         switch (sigmaType)
         {
             case 'W':
-                PropsVector.push_back(Reader.GetWithoutSigmaW(sigmaVec[i], enable_debug_print = true));
+                PropsVector.push_back(
+                    Reader.GetWithoutSigmaW(
+                        sigmaVec[i], 
+                        enable_debug_print = true
+                    )
+                );
                 break;
+
             case 'M':
-                PropsVector.push_back(Reader.GetWithoutSigmaM(sigmaVec[i], enable_debug_print = true));
+                PropsVector.push_back(
+                    Reader.GetWithoutSigmaM(
+                        sigmaVec[i], 
+                        enable_debug_print = true
+                    )
+                );
                 break;
+
             default:
                 cout << "===============================ERROR!!================================\n" << endl;
                 break;
@@ -145,15 +155,24 @@ vector<SolverResults> Experiments::CalculateWithVaryingSigma(
     return results;
 }
 
-// Launch Visualiser.py     !! THIS FUNCTION WORKS ONLY ON WINDOWS !!
-void Experiments::Visualise_Windows()
+// Run visualisation script
+void Experiments::RunVisualiser()
 { 
-    WinExec("python ..\\Visualiser.py", 1);
+    string visCommand = "python3 .." + file_path_separator + "Visualiser.py";
+    system(visCommand.c_str());
 }
 
 Experiments::Experiments()
 {
-    file_path_prefix = "..\\Data\\";
+    #ifdef _WIN32
+        file_path_separator = "\\";
+    #else
+        file_path_separator = "/";
+    #endif
+    file_path_prefix = ".." + 
+                       file_path_separator + 
+                       "Data" + 
+                       file_path_separator;
     visdata_path = file_path_prefix + "VisData.csv";
 }
 
@@ -164,21 +183,26 @@ Experiments::~Experiments()
 
 void Experiments::Experiment_14_4(int input_data)
 {
+    reader_file_path = file_path_prefix + 
+                       "14" +
+                       file_path_separator +
+                       "4" +
+                       file_path_separator;
     string plotTitle;
     switch(input_data)
     {
         case 0:
-            reader_file_path = file_path_prefix + "14\\4\\a.csv";
+            reader_file_path += "a.csv";
             plotTitle = "(a)";
             break;
 
         case 1:
-            reader_file_path = file_path_prefix + "14\\4\\b.csv";
+            reader_file_path += "b.csv";
             plotTitle = "(b)";
             break;
         
             case 2:
-            reader_file_path = file_path_prefix + "14\\4\\c.csv";
+            reader_file_path += "c.csv";
             plotTitle = "(c)";
             break;
     }
@@ -207,20 +231,33 @@ void Experiments::Experiment_14_4(int input_data)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("14.4", plotTitle, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::Experiment_14_6(char sigmaType, string radiusType)
 {
-    reader_file_path = file_path_prefix + "14\\6\\a.csv";
-    string plotTitle = "(a)";
-    if(sigmaType == 'M')
+    reader_file_path = file_path_prefix + 
+                       "14" +
+                       file_path_separator +
+                       "6" +
+                       file_path_separator;
+    string plotTitle = "";
+    if(sigmaType == 'W')
     {
-        reader_file_path = file_path_prefix + "14\\6\\b.csv";
+        reader_file_path += "a.csv";
+        plotTitle = "(a)";
+    }
+    else
+    {
+        reader_file_path += "b.csv";
         plotTitle = "(b)";
     }
-    auto sigmaVec = Vector::setLinSpaced(160, EPSILON, 0.2);
-    auto solverResults = CalculateWithVaryingSigma(200, sigmaType, sigmaVec);
+    Vector sigmaVec = Vector::setLinSpaced(160, EPSILON, 0.2);
+    vector<SolverResults> solverResults = CalculateWithVaryingSigma(
+        200, 
+        sigmaType, 
+        sigmaVec
+    );
     
     Vector convergedN;
     Vector convergedCSquareRoot;
@@ -247,18 +284,23 @@ void Experiments::Experiment_14_6(char sigmaType, string radiusType)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("14.6", plotTitle, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::Custom_Experiment()
 {
-    reader_file_path = file_path_prefix + "Custom\\experiment.csv";
+    reader_file_path = file_path_prefix + 
+                       "Custom" +
+                       file_path_separator +
+                       "experiment.csv";
     string plot_title = "My experiment";
-    auto solver_results = CalculateFirstMoment(100, SquaredN, 0.1);
-
+    SolverResults solverResults = CalculateFirstMoment(
+        100, 
+        SquaredN, 0.1
+    );
     Vector N;
     Vector CSquareRoot;
-    for (auto Values : solver_results.Values)
+    for (auto Values : solverResults.Values)
     {
         CalcType N_value = Values.first();
         N.add(N_value);
@@ -268,10 +310,10 @@ void Experiments::Custom_Experiment()
     }
     
     vector<Vector> plot_points;
-    plot_points.push_back(solver_results.Times);
+    plot_points.push_back(solverResults.Times);
     plot_points.push_back(N);
     plot_points.push_back(CSquareRoot);
-
+    reader_file_path = file_path_prefix + "Custom\\experiment.csv";
     vector<string> plot_labels;
     plot_labels.push_back("Time");
     plot_labels.push_back("N");
@@ -279,13 +321,19 @@ void Experiments::Custom_Experiment()
 
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("1", plot_title, plot_labels, plot_points);
-    Visualise_Windows();
+    RunVisualiser();
 }
 
 void Experiments::KernelTest(char KernelSymbol, string case_str)
 {
-    FileReader Reader(file_path_prefix + "14\\4\\" + case_str + ".csv");
-    auto Props = Reader.GetProperties(enable_debug_print = true);
+    reader_file_path = file_path_prefix + 
+                       "14" +
+                       file_path_separator +
+                       "4" +
+                       file_path_separator +
+                       case_str + ".csv";
+    FileReader Reader(reader_file_path);
+    Properties Props = Reader.GetProperties(enable_debug_print = true);
     
     Matrix kernel;
     string title;
@@ -302,7 +350,7 @@ void Experiments::KernelTest(char KernelSymbol, string case_str)
             break;
         
         default:
-            cout << "ERROR: No such kernel\n";
+            cout << "ERROR: kernel " << string(1, KernelSymbol) << " does not exist\n";
             break;
     }
 
@@ -355,7 +403,7 @@ void Experiments::KernelTest(char KernelSymbol, string case_str)
             break;
 
         default:
-            cout << "ERROR: No such kernel\n";
+            cout << "ERROR: kernel " << string(1, KernelSymbol) << " does not exist\n";
             break;
     }
 
@@ -369,5 +417,5 @@ void Experiments::KernelTest(char KernelSymbol, string case_str)
     };
     FileWriter VisData(visdata_path);
     VisData.WritePlotData("1", title, plotLabels, plotPoints);
-    Visualise_Windows();
+    RunVisualiser();
 }

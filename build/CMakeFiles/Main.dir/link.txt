@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/Main.dir/link.d CMakeFiles/Main.dir/src/main.cpp.o -o Main  libSolverLib.a libTypesLib.a /usr/lib/gcc/x86_64-linux-gnu/15/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a -lncurses

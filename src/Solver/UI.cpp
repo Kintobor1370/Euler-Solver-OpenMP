@@ -1,16 +1,45 @@
 #include <iostream>
-#include <conio.h>
 #include "Experiments.hpp"
 #include "UI.hpp"
+
+#ifdef _WIN32
+	#include <conio.h>
+#else
+	#include <curses.h>
+#endif
 
 using namespace std;
 
 
 //____________________________________________________USER INTERFACE_______________________________________________________
+void UserInterface::InitialiseWindow()
+{
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+        initscr();
+        noecho();
+        cbreak();
+        keypad(stdscr, true);
+    #endif
+}
+
+void UserInterface::ClearWindow()
+{
+    #ifdef _WIN32
+        system("cls");
+    #else
+        endwin();
+        system("clear");
+    #endif
+}
+
 void UserInterface::DisplayMenu()
 {
-    system("cls");
-    cout << GREETINGS_MSG + menu[currentIndex] + HINT_MSG;   
+    string menuStr = GREETINGS_MSG + menu[currentIndex] + HINT_MSG;
+    handler.ResetCursor();
+    handler.Print(menuStr);
 }
 
 void UserInterface::GoUp()
@@ -33,7 +62,7 @@ UserInterface::UserInterface(vector<string> myOptions)
         string optionsStr = "";
         for (int j = 0; j < myOptions.size(); j++)
         {
-            optionsStr += i == j ? CHOSEN_STR : EMPTY_STR;
+            optionsStr += i == j ? CURSOR_STR : NO_CURSOR_STR;
             optionsStr += myOptions[j] + "\n";
         }
         menu.push_back(optionsStr);
@@ -43,25 +72,30 @@ UserInterface::UserInterface(vector<string> myOptions)
 
 void UserInterface::Live()
 {
-    DisplayMenu();
-    char input = getch();
+    vector<char> kernelTestTypes = { 'W', 'M' };
+    vector<string> kernelTestVariants = { "a", "b", "c" };
 
-    while(input != KEY_ESC)
+    handler.ClearWindow();
+    DisplayMenu();
+
+    int input = handler.GetUserInput();
+    while (input != KEY_ESC)
     {
-        switch (input)
+        switch(input)
         {
             case KEY_UP:
                 GoUp();
-                input = getch();
+                input = handler.GetUserInput();
                 break;
 
             case KEY_DOWN:
                 GoDown();
-                input = getch();
+                input = handler.GetUserInput();
                 break;
-
+            
             case KEY_ENT:
-                system("cls");
+                //handler.ClearWindow();
+                handler.EndWindow();
                 switch(currentIndex)
                 {
                     case 0: case 1: case 2:
@@ -77,46 +111,50 @@ void UserInterface::Live()
                         break;
                 
                     case 5:
-                        cout << CUSTOM_HINT_MSG;
-                        input = getch();
+                        handler.Print(CUSTOM_HINT_MSG);
+                        input = handler.GetUserInput();
+                        while (input != KEY_ENT && input != KEY_ESC)
+                        {
+                            input = handler.GetUserInput();
+                        }
                         if (input == KEY_ENT)
                         {
-                            system("cls");
+                            handler.EndWindow();
                             run.Custom_Experiment();
                         }
-                        else if (input != KEY_ESC)
-                            input = getch();
                         break;
 
                     case 6:
-                        run.KernelTest('W', "a");
-                        cout << "Press any key\n";
-                        getch();
-                        run.KernelTest('W', "b");
-                        cout << "Press any key\n";
-                        getch();
-                        run.KernelTest('W', "c");
-                        cout << "Press any key\n";
-                        getch();
-                        run.KernelTest('M', "a");
-                        cout << "Press any key\n";
-                        getch();
-                        run.KernelTest('M', "b");
-                        cout << "Press any key\n";
-                        getch();
-                        run.KernelTest('M', "c");
-                        cout << "Tests Complete!\n";
+                        for (auto& kernelType : kernelTestTypes)
+                        {
+                            for (auto& variant : kernelTestVariants)
+                            {
+                                run.KernelTest(kernelType, variant);
+                                cout << "Press any key to continue.\n";
+                                handler.GetUserInput(false);
+                            }
+                        }
                         break;
 
                     default:
-                        cout << "ERROR: No such experiment!!\n";
+                        handler.Print("ERROR: Experiment does not exist!\n");
                         break;
                 }
+                cout << "Press any key to finish.\n";
+                handler.GetUserInput(false);
+                cout.flush();
 
+                // Reset input
+                input = -1;
+
+                handler.ClearWindow();
+                DisplayMenu();
+                break;
+            
             default:
-                input = getch();
+                input = handler.GetUserInput();
                 break;
         }
     }
-    system("cls");
+    handler.ClearWindow();
 }
