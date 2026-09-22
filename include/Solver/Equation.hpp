@@ -58,7 +58,7 @@ private:
     );
 
     CalcType BilinearInterpolation(
-        Vector grid,
+        Vector& grid,
         Matrix values,
         CalcType x,
         CalcType y,

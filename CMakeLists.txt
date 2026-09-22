@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Euler-Solver-OpenMP
+project("Euler-Solver-OpenMP"
     VERSION 1.0
     LANGUAGES CXX
 )
@@ -14,28 +14,11 @@ find_package(Python3 REQUIRED COMPONENTS
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(TypesLib
-    src/Types/Vector.cpp
-    src/Types/Matrix.cpp
-    src/Types/VectorOfMatrix.cpp
-    src/Types/MatrixOfMatrix.cpp
-    src/Types/Function.cpp
-    src/Types/VectorOfFunction.cpp
-    src/Types/MatrixOfFunction.cpp
-    src/Types/Conversion.cpp
-    src/Types/Time.cpp
-)
+file(GLOB TYPES_SOURCE_FILES src/Types/*.cpp)
+add_library(TypesLib ${TYPES_SOURCE_FILES})
 
-add_library(SolverLib
-    src/Solver/Properties.cpp
-    src/Solver/Equation.cpp
-    src/Solver/Solver.cpp
-    src/Solver/FileReader.cpp
-    src/Solver/FileWriter.cpp
-    src/Solver/Experiments.cpp
-    src/Solver/IOHandler.cpp
-    src/Solver/UI.cpp
-)
+file(GLOB SOLVER_SOURCE_FILES src/Solver/*.cpp)
+add_library(SolverLib ${SOLVER_SOURCE_FILES})
 
 target_include_directories(TypesLib
     PUBLIC
@@ -61,11 +44,11 @@ if(UNIX)
     )
 endif()
 
-add_executable(Main
+add_executable(${PROJECT_NAME}
     src/main.cpp
 )
 
-target_link_libraries(Main
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
         SolverLib
 )

@@ -230,7 +230,7 @@ CalcType Equation::MakeIntegralWithPairDensityShift(
 }
 
 CalcType Equation::BilinearInterpolation(
-    Vector grid,
+    Vector& grid,
     Matrix values,
     CalcType x,
     CalcType y,
@@ -251,9 +251,9 @@ CalcType Equation::BilinearInterpolation(
     while (x > grid[i]) i++;
     while (y > grid[j]) j++;
     
-    CalcType a = grid[i-1];
+    CalcType a = grid[i - 1];
     CalcType b = grid[i];
-    CalcType c = grid[j-1];
+    CalcType c = grid[j - 1];
     CalcType d = grid[j];
 
     // Compute weights
@@ -261,9 +261,9 @@ CalcType Equation::BilinearInterpolation(
     CalcType wy = (y - c) / (d - c);
 
     // Compute weighted value
-    CalcType value = values[i-1][j-1] * (1 - wx) * (1 - wy) + 
-                     values[i][j-1] * wx * (1 - wy) +
-                     values[i-1][j] * (1 - wx) * wy +
+    CalcType value = values[i - 1][j - 1] * (1 - wx) * (1 - wy) + 
+                     values[i][j - 1] * wx * (1 - wy) +
+                     values[i - 1][j] * (1 - wx) * wy +
                      values[i][j] * wx * wy;
     return value;
 }
@@ -365,7 +365,7 @@ Vector Equation::operator () (CalcType times, Vector vals, ExtrapolationType cho
     CalcType gamma = 0;
     C_extrapolation_type = chosen_type;
 
-    N = vals.head(props.SpeciesNumber);
+    N = move(vals.head(props.SpeciesNumber));
     vals.erase_first(props.SpeciesNumber);
     C = VectorToMatrixOfMatrix(vals, props.SpeciesNumber, props.MomentsGrid.size());
 
@@ -403,7 +403,8 @@ Vector Equation::operator () (CalcType times, Vector vals, ExtrapolationType cho
                 for (int yNum = 0; yNum < props.MomentsGrid.size(); yNum++)
                 {
                     // Birth contribution, density independent
-                    CalcType result = props.b[i] * MCShift(i, j)[xNum][yNum] + props.b[j] * MCShift(j, i)[xNum][yNum]; 
+                    CalcType result = props.b[i] * MCShift(i, j)[xNum][yNum] + 
+                                      props.b[j] * MCShift(j, i)[xNum][yNum]; 
 
                     // Birth contribution, Kronecker symbols
                     if (i == j)

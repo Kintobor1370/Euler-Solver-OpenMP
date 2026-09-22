@@ -38,7 +38,12 @@ struct Properties
     CalcType KernelsGridStep;                                           // The step of uniform grid for kernels
 
     //..............................GENERATE GRIDS FOR KERNELS AND PAIR DENSITIES
-    void GenerateGrids(CalcType sigma_w, CalcType sigma_m);
+    void GenerateGrids(
+        CalcType sigma_w, 
+        CalcType sigma_m,
+        CalcType cutoff_dist_multiplier =  5,
+        int num_for_moments = 5
+    );
 
     //..............................GENERATE KERNEL
     std::pair<Matrix, CalcType> GenerateKernel(

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <numeric>
+#include <utility>
 #include <algorithm>
 #include "Vector.hpp"
 
@@ -8,7 +9,7 @@ using namespace std;
 
 
 //_________________________________VECTOR OF CALCULATION TYPE__________________________________
-Vector::Vector(vector<CalcType> stlVec)
+Vector::Vector(const vector<CalcType>& stlVec)
 {
     vec.assign(stlVec.begin(), stlVec.end());
 }
@@ -18,14 +19,18 @@ Vector::Vector(const int size)
     vec.resize(size); 
 }
 
-Vector::Vector(const int size, CalcType val)
+Vector::Vector(const int size, const CalcType val)
 {
     vec.reserve(size);
-    for (int i=0; i<size; i++)
+    for (int i = 0; i < size; i++)
     {
         vec.push_back(val);
     }
 }
+
+Vector::Vector(const Vector& other) : vec(other.vec) {}
+
+Vector::Vector(Vector&& other) noexcept : vec(move(other.vec)) {}
 
 vector<CalcType> Vector::get_vector()
 { 
@@ -42,7 +47,7 @@ bool Vector::empty()
     return vec.empty(); 
 }
 
-int Vector::size() 
+int Vector::size() const
 { 
     return vec.size(); 
 }
@@ -87,32 +92,29 @@ bool Vector::add_unique(CalcType newItem)
 
 CalcType Vector::first() 
 { 
-    return vec.at(0); 
+    return vec.front(); 
 }
 
 CalcType Vector::last() 
 { 
-    return vec.at(vec.size() - 1); 
+    return vec.back(); 
 }
 
 Vector Vector::head(int n)                  
 {
-    vector<CalcType> vecHead(vec.begin(), vec.begin() + n);
+    vector<CalcType> vecHead(vec.begin(), vec.begin() + min(n, (int) vec.size()));
     return Vector(vecHead); 
 }
 
 Vector Vector::tail(int n)
 {
-    vector<CalcType> vecTail(vec.end() - n, vec.end());
+    vector<CalcType> vecTail(vec.end() - min(n, (int) vec.size()), vec.end());
     return Vector(vecTail);
 }
 
 void Vector::erase_first(int n)
 {
-    for (int i = 0; i < n; i++)
-    {
-        vec.erase(vec.begin());
-    }
+    vec.erase(vec.begin(), vec.begin() + min(n, (int) vec.size()));
 }
 
 CalcType Vector::min_value()
@@ -132,7 +134,7 @@ CalcType Vector::sum()
 
 CalcType Vector::avg_value() 
 { 
-    return vec.empty() ? 0 : accumulate(vec.begin(), vec.end(), 0) / vec.size(); 
+    return vec.empty() ? 0 : (accumulate(vec.begin(), vec.end(), 0) / vec.size()); 
 }
 
 Vector Vector::setLinSpaced(
@@ -142,11 +144,12 @@ Vector Vector::setLinSpaced(
 ) {
     Vector result(size);
     CalcType step = (maxVal - minVal) / (size - 1);
-    for (int i=0; i<size-1; i++)
+    result[0] = minVal;
+    result[size - 1] = maxVal;
+    for (int i = 1; i < size - 1; i++)
     {
         result[i] = minVal + i * step;
     }
-    result[size - 1] = maxVal;
     return result;
 }
 
@@ -168,6 +171,16 @@ Vector Vector::abs(Vector arg)
         return std::abs(a);
     });
     return Vector(absVec);
+}
+
+Vector& Vector::operator = (const Vector& v)
+{
+    vec = v.vec;
+}
+
+Vector& Vector::operator = (Vector&& v) noexcept
+{
+    vec = move(v.vec);
 }
 
 Vector operator + (Vector baseVec, CalcType addVal)
@@ -203,7 +216,7 @@ Vector operator / (Vector baseVec, CalcType divVal)
     transform(baseVec.begin(), baseVec.end(), quotient.begin(), [divVal](CalcType a){
         return a / divVal;
     });
-    return quotient;
+    return Vector(quotient);
 }
 
 Vector Vector::operator - ()

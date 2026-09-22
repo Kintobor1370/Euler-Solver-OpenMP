@@ -36,7 +36,7 @@ private:
         CalcType tMax, 
         char sigmaType, 
         Vector sigmaVec, 
-        ExtrapolationType type=SquaredN, 
+        ExtrapolationType type = SquaredN, 
         CalcType step = 0.1
     );
 

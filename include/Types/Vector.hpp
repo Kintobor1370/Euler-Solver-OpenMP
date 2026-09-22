@@ -16,11 +16,17 @@ class Vector
     std::vector<CalcType> vec;
 
 public:
-    Vector(std::vector<CalcType> stlVec);
+    Vector(const std::vector<CalcType>& stlVec);
 
     Vector(const int size = 0);
 
-    Vector(const int size, CalcType val);
+    Vector(const int size, const CalcType val);
+
+    //....................Copy constructor
+    Vector(const Vector& other);
+
+    //....................Move constructor
+    Vector(Vector&& other) noexcept;
 
     //....................Returns the original vector (required for drawing plots)
     std::vector<CalcType> get_vector();
@@ -32,7 +38,7 @@ public:
     bool empty();
 
     //....................Returns Vector's size
-    int size();
+    int size() const;
 
     //....................Modifies Vector's size
     void resize(int newSize);
@@ -91,6 +97,10 @@ public:
 
     //....................Absolute values of vector elements
     static Vector abs(Vector arg);
+
+    Vector& operator = (const Vector& v);
+
+    Vector& operator = (Vector&& v) noexcept;
 
     //....................Vector + calculation type value
     friend Vector operator + (Vector baseVec, CalcType addVal);

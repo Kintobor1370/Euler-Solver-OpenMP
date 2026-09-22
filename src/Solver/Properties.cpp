@@ -10,12 +10,13 @@ using namespace std;
 //..............................GENERATE GRIDS FOR KERNELS AND PAIR DENSITIES
 void Properties::GenerateGrids(
     CalcType sigma_w, 
-    CalcType sigma_m
+    CalcType sigma_m,
+    CalcType cutoff_dist_multiplier,
+    int num_for_moments
 ) {
-    CalcType cutoff_distance = (sigma_w + sigma_m) * 5;
-    CalcType max_radius = std::max(sigma_w, sigma_m) * 5;
+    CalcType cutoff_distance = (sigma_w + sigma_m) * cutoff_dist_multiplier;
+    CalcType max_radius = std::max(sigma_w, sigma_m) * cutoff_dist_multiplier;
 
-    int num_for_moments = 5;
     auto moments_grid = Vector::abs(
         -Vector::log(
             -Vector::setLinSpaced(num_for_moments, 0, num_for_moments - 1) / num_for_moments + 1
@@ -32,6 +33,7 @@ void Properties::GenerateGrids(
     }
     CalcType parameter = cutoff_distance / moments_grid.last();
     moments_grid = moments_grid * parameter;
+    
     assert (std::abs(moments_grid.last() - cutoff_distance) < EPSILON);
 
     int num_for_kernels = (num_for_moments - 1) * 2 - 1;
@@ -40,16 +42,16 @@ void Properties::GenerateGrids(
         num_for_kernels = (num_for_kernels - 2) * 4 - 1;
         num_for_kernels = (num_for_kernels - 1) * 2 - 1;
     }
-    cout << "number of mid-points for pair density grid: " << num_for_moments
-         << "\nnumber of mid-points for kernels grid:      " << num_for_kernels << "\n\n";
+    cout << "number of mid-points for pair density grid: " << num_for_moments << "\n"
+         << "number of mid-points for kernels grid:      " << num_for_kernels << "\n\n";
 
     assert ((num_for_kernels % 2 == 1) && (num_for_kernels >= 5));
     auto kernels_grid = Vector::setLinSpaced(num_for_kernels, 0, max_radius);
 
     CutoffDistance  = moments_grid.last();
-    MomentsGrid = moments_grid;
-    KernelsGrid = kernels_grid;
-    KernelsGridStep = kernels_grid[2] - kernels_grid[0];
+    MomentsGrid = move(moments_grid);
+    KernelsGrid = move(kernels_grid);
+    KernelsGridStep = KernelsGrid[2] - KernelsGrid[0];
 }
 
 //..............................GENERATE KERNEL
@@ -58,18 +60,17 @@ pair<Matrix, CalcType> Properties::GenerateKernel(
     CalcType R,                                                     // Max radius 
     KernelType type
 ) {
-    Vector grid = KernelsGrid;
     CalcType step = KernelsGridStep;
 
-    Matrix kernel_values(grid.size());
+    Matrix kernel_values(KernelsGrid.size());
     int max_non_zero_num = 0; 
 
     // Calculate
-    for (int x = 0; x < grid.size(); x++)
+    for (int x = 0; x < KernelsGrid.size(); x++)
     {
-        for (int y = 0; y < grid.size(); y++)
+        for (int y = 0; y < KernelsGrid.size(); y++)
         {
-            const auto r = hypot(grid[x], grid[y]);
+            const auto r = hypot(KernelsGrid[x], KernelsGrid[y]);
             if(r <= R)
             {
                 switch (type)
@@ -88,13 +89,10 @@ pair<Matrix, CalcType> Properties::GenerateKernel(
             else kernel_values[x][y] = 0;
         }
     }
-    if (grid.size() % 2 == 1 && max_non_zero_num % 2 == 0 && max_non_zero_num != 2)
+    if (max_non_zero_num == 1 ||
+        KernelsGrid.size() % 2 == 1 && max_non_zero_num % 2 == 0 && max_non_zero_num != 2)
     {
         max_non_zero_num++;
-    }
-    if (max_non_zero_num == 1)
-    {
-        max_non_zero_num = 2;
     }
 
     // Renormalize

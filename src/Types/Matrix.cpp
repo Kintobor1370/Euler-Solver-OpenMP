@@ -42,7 +42,7 @@ void Matrix::resize(const int newSize)
 void Matrix::resize(const int r, const int c)
 {
     mat.resize(r);
-    for (int i=0; i<r; i++)
+    for (int i = 0; i < r; i++)
     {
         mat[i].resize(c);
     }
@@ -56,7 +56,7 @@ Vector Matrix::Row(const int rowNum)
 Vector Matrix::Col(const int colNum)
 {
     Vector col(mat.size());
-    for (int i=0; i<mat.size(); i++)
+    for (int i = 0; i < mat.size(); i++)
     {
         col[i] = mat.at(i)[colNum];
     }
@@ -67,7 +67,7 @@ CalcType Matrix::min_value()
 {
     vector<CalcType> minVals;
     minVals.reserve(mat.size());
-    for (int i=0; i<mat.size(); i++)
+    for (int i = 0; i < mat.size(); i++)
     {
         minVals.push_back(mat.at(i).min_value());
     }
@@ -78,7 +78,7 @@ CalcType Matrix::max_value()
 {
     vector<CalcType> maxVals;
     maxVals.reserve(mat.size());
-    for (int i=0; i<mat.size(); i++)
+    for (int i = 0; i < mat.size(); i++)
     {
         maxVals.push_back(mat.at(i).max_value());
     }
