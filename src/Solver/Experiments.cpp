@@ -208,8 +208,8 @@ void Experiments::Experiment_14_4(int input_data)
     }
     auto solverResults = CalculateFirstMoment(100);
 
-    Vector N;
-    Vector CSquareRoot;
+    Vector N(solverResults.Values.size());
+    Vector CSquareRoot(solverResults.Values.size());
     for (auto Values : solverResults.Values)
     {
         CalcType NVal = Values.first();
@@ -259,8 +259,8 @@ void Experiments::Experiment_14_6(char sigmaType, string radiusType)
         sigmaVec
     );
     
-    Vector convergedN;
-    Vector convergedCSquareRoot;
+    Vector convergedN(PropsVector.size());
+    Vector convergedCSquareRoot(PropsVector.size());
     for (int i = 0; i < PropsVector.size(); i++)
     {
         auto values = solverResults.at(i).Values;
@@ -298,8 +298,8 @@ void Experiments::Custom_Experiment()
         100, 
         SquaredN, 0.1
     );
-    Vector N;
-    Vector CSquareRoot;
+    Vector N(solverResults.Values.size());
+    Vector CSquareRoot(solverResults.Values.size());
     for (auto Values : solverResults.Values)
     {
         CalcType N_value = Values.first();

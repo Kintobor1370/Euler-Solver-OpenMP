@@ -32,6 +32,8 @@ private:
     void addDerivative(Vector derivative);
 
 public:
+    EulerSolver();
+
     // Solve given equation numericaly for fixed amount of iterations
     SolverResults Solve(
         Equation currEquation,

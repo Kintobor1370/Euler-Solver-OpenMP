@@ -9,20 +9,18 @@ using namespace std;
 
 
 //______________________FUNCTION OF CALCULATION TYPE ON 1D, 2D OR 3D SPACE_____________________
-Function::Function(const int size)
-{
-    x.resize(size);
-    y.resize(size);
-}
+Function::Function(const int size) : x(size, 0), y(size, 0) {}
 
 Function::Function(Vector xGrid, Vector yVals) : x(xGrid), y(yVals) {}
 
-Function::Function(Vector xGrid, Matrix yVals)
+Function::Function(Vector xGrid, Matrix yVals) : 
+    x(xGrid.size() * (xGrid.size() - 1) / 2), 
+    y(xGrid.size() * (xGrid.size() - 1) / 2)
 {
     map<CalcType, CalcType> XY;
-    for (int i=0; i<xGrid.size(); i++)
+    for (int i = 0; i < xGrid.size(); i++)
     {
-        for (int j=i; j<xGrid.size(); j++)
+        for (int j = i; j < xGrid.size(); j++)
         {
             assert (abs(yVals[i][j] - yVals[j][i]) < EPSILON);
             CalcType xHypot = hypot(xGrid[i], xGrid[j]);
@@ -36,12 +34,14 @@ Function::Function(Vector xGrid, Matrix yVals)
     }
 }
 
-Function::Function(Vector xGrid, Matrix yVals, CalcType xMax)
+Function::Function(Vector xGrid, Matrix yVals, CalcType xMax) :
+    x(xGrid.size() * (xGrid.size() - 1) / 2), 
+    y(xGrid.size() * (xGrid.size() - 1) / 2)
 {
     map<CalcType, CalcType> XY;
-    for (int i=0; i<xGrid.size(); i++)
+    for (int i = 0; i < xGrid.size(); i++)
     {
-        for (int j=i; j<xGrid.size(); j++)
+        for (int j = i; j < xGrid.size(); j++)
         {
             assert (abs(yVals[i][j] - yVals[j][i]) < EPSILON);
             CalcType xHypot = hypot(xGrid[i], xGrid[j]);
@@ -79,9 +79,9 @@ static Function trim(Function func, CalcType xFinal)
     assert (it != xVals.end());
     int finalIndex = distance(xVals.begin(), it);
     
-    Vector xValsTrimmed;
-    Vector yValsTrimmed;
-    for (int i=0; i<=finalIndex; i++)
+    Vector xValsTrimmed(finalIndex);
+    Vector yValsTrimmed(finalIndex);
+    for (int i = 0; i <= finalIndex; i++)
     {
         xValsTrimmed.add(func.X()[i]);
         yValsTrimmed.add(func.Y()[i]);
@@ -169,7 +169,7 @@ CalcType Function::IntegralRectangles()
 Function operator + (Function baseFunc, CalcType addVal)
 {
     Vector Y = baseFunc.Y();
-    Vector YNew;
+    Vector YNew(Y.size());
     for (int i = 0; i < Y.size(); i++)
     {
         YNew.add(Y[i] + addVal);
@@ -181,7 +181,7 @@ Function operator + (Function baseFunc, CalcType addVal)
 Function operator - (Function baseFunc, CalcType subVal)
 {
     Vector Y = baseFunc.Y();
-    Vector YNew;
+    Vector YNew(Y.size());
     for (int i = 0; i < Y.size(); i++)
     {
         YNew.add(Y[i] - subVal);
@@ -193,7 +193,7 @@ Function operator - (Function baseFunc, CalcType subVal)
 Function operator * (Function baseFunc, CalcType comVal)
 {
     Vector Y = baseFunc.Y();
-    Vector YNew;
+    Vector YNew(Y.size());
     for (int i = 0; i < Y.size(); i++)
     {
         YNew.add(Y[i] * comVal);
@@ -205,7 +205,7 @@ Function operator * (Function baseFunc, CalcType comVal)
 Function operator / (Function baseFunc, CalcType divVal)
 {
     Vector Y = baseFunc.Y();
-    Vector YNew;
+    Vector YNew(Y.size());
     for (int i = 0; i < Y.size(); i++)
     {
         YNew.add(Y[i] / divVal);
@@ -216,7 +216,7 @@ Function operator / (Function baseFunc, CalcType divVal)
 
 Function Function::operator - ()
 {
-    Vector YNew;
+    Vector YNew(y.size());
     for (int i = 0; i < y.size(); i++)
     {
         YNew.add(-1 * y[i]);

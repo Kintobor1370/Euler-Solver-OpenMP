@@ -9,6 +9,8 @@ using namespace std;
 
 
 //_________________________________VECTOR OF CALCULATION TYPE__________________________________
+Vector::Vector() {}
+
 Vector::Vector(const vector<CalcType>& stlVec)
 {
     vec.assign(stlVec.begin(), stlVec.end());
@@ -16,7 +18,7 @@ Vector::Vector(const vector<CalcType>& stlVec)
 
 Vector::Vector(const int size) 
 {
-    vec.resize(size); 
+    vec.reserve(size); 
 }
 
 Vector::Vector(const int size, const CalcType val)
@@ -42,7 +44,7 @@ CalcType& Vector::operator [] (const int index)
     return vec.at(index); 
 }
 
-bool Vector::empty() 
+bool Vector::empty() const
 { 
     return vec.empty(); 
 }
@@ -133,8 +135,8 @@ CalcType Vector::sum()
 }
 
 CalcType Vector::avg_value() 
-{ 
-    return vec.empty() ? 0 : (accumulate(vec.begin(), vec.end(), 0) / vec.size()); 
+{
+    return vec.empty() ? 0 : (accumulate(vec.begin(), vec.end(), 0) / (CalcType) vec.size()); 
 }
 
 Vector Vector::setLinSpaced(
@@ -142,7 +144,7 @@ Vector Vector::setLinSpaced(
     CalcType minVal, 
     CalcType maxVal
 ) {
-    Vector result(size);
+    Vector result(size, 0);
     CalcType step = (maxVal - minVal) / (size - 1);
     result[0] = minVal;
     result[size - 1] = maxVal;
@@ -176,11 +178,13 @@ Vector Vector::abs(Vector arg)
 Vector& Vector::operator = (const Vector& v)
 {
     vec = v.vec;
+    return *this;
 }
 
 Vector& Vector::operator = (Vector&& v) noexcept
 {
     vec = move(v.vec);
+    return *this;
 }
 
 Vector operator + (Vector baseVec, CalcType addVal)

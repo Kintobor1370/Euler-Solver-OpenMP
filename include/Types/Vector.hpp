@@ -16,9 +16,11 @@ class Vector
     std::vector<CalcType> vec;
 
 public:
+    Vector();
+
     Vector(const std::vector<CalcType>& stlVec);
 
-    Vector(const int size = 0);
+    Vector(const int size);
 
     Vector(const int size, const CalcType val);
 
@@ -35,7 +37,7 @@ public:
     CalcType& operator [] (const int index);
 
     //....................Returns true if vector is empty
-    bool empty();
+    bool empty() const;
 
     //....................Returns Vector's size
     int size() const;

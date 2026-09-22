@@ -10,19 +10,17 @@ class Matrix
     std::vector<Vector> mat;
 
 public:
-    Matrix(const int size = 0);
-
-    Matrix(const int size, CalcType val);
+    Matrix(const int size = 0, const CalcType val = 0);
 
     Vector& operator [] (const int rowNum);
 
-    int size();
+    int size() const;
 
     void resize(const int newSize);
 
     void resize(const int r, const int c);
 
-    Vector Row(const int rowNum);
+    Vector Row(const int rowNum) const;
 
     Vector Col(const int colNum);
 

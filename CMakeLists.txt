@@ -13,6 +13,7 @@ find_package(Python3 REQUIRED COMPONENTS
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "-O3")
 
 file(GLOB TYPES_SOURCE_FILES src/Types/*.cpp)
 add_library(TypesLib ${TYPES_SOURCE_FILES})

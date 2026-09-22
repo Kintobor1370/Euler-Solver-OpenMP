@@ -150,7 +150,7 @@ Properties Properties::Generate(
     }    
 
     VectorOfMatrix m(num);
-    Vector max_num_m(num);
+    Vector max_num_m(num, 0);
     
     Vector max_radius_M;
     if (m_type == Normal)

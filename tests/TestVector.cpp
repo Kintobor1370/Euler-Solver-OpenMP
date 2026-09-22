@@ -8,7 +8,7 @@
 using namespace std;
 
 
-// Assert if Vector is equal to its vector<CalcType> counterpart
+// Assert if Vector object is equal to its vector<CalcType> counterpart
 void AssertVectorEqual(
     Vector& actual,
     const vector<CalcType>& expected
@@ -26,15 +26,6 @@ void TestConstructorFromSTLVector()
 {
     vector<CalcType> STLVec { 1, 2, 3, 4, 5 };
     Vector Vec(STLVec);
-    AssertVectorEqual(Vec, STLVec);
-}
-
-// Constructor from size
-void TestConstructorFromSize()
-{
-    int size = 5;
-    vector<CalcType> STLVec(size, 0.0);
-    Vector Vec(size);
     AssertVectorEqual(Vec, STLVec);
 }
 
@@ -62,7 +53,7 @@ void TestIndexing()
 
 void TestSize()
 {
-    Vector vec(3);
+    Vector vec(3, 0);
     assert(vec.size() == 3);
     
     vec.add(0);
@@ -229,7 +220,7 @@ void TestTail()
     AssertVectorEqual(vecTail2, vec.get_vector());
 }
 
-// TEST MIN / MAX
+// TEST MIN / MAX VALUES
 void TestMinValue()
 {
     Vector vec({ 1, 4, -2, 0, 3, -1, 2 });
@@ -253,7 +244,6 @@ void TestSum()
 void TestAvgValue()
 {
     Vector vec({ 1, 2, 3, 4 });
-    cout << vec.sum() / vec.size() << "  " << vec.avg_value() << "\n";
     assert(vec.avg_value() == 2.5);
 }
 
@@ -270,7 +260,7 @@ void TestSetLinSpaced()
 // TEST MATHEMATICAL FUNCTIONS
 void TestLog()
 {
-    Vector vec({ 0, exp(1), exp(2), exp(3), exp(4) });
+    Vector vec({ 1, exp(1), exp(2), exp(3), exp(4) });
     Vector logVec = Vector::log(vec);
     AssertVectorEqual(
         logVec,
@@ -385,52 +375,90 @@ void TestArithmeticsVector(
 
 int main()
 {
+    cout << "Constructors tests............";
     TestConstructorFromSTLVector();
-    TestConstructorFromSize();
     TestConstructorFromSizeAndValue();
+    cout << "passed!\n";
 
+    cout << "Basic operators tests.........";
     TestIndexing();
     TestSize();
     TestEmpty();
     TestGetVector();
     TestResize();
     TestClear();
+    cout << "passed!\n";
 
+    cout << "Appending tests...............";
     TestAddValue();
     TestAddVector();
     TestAddUnique();
+    cout << "passed!\n";
 
+    cout << "Sorting operator test.........";
     TestSort();
+    cout << "passed!\n";
 
+    cout << "Erase first n items test......";
     TestEraseFirst();
+    cout << "passed!\n";
 
+    cout << "First item test...............";
     TestFirst();
+    cout << "passed!\n";
+    
+    cout << "Last item test................";
     TestLast();
+    cout << "passed!\n";
+    
+    cout << "First n items test............";
     TestHead();
+    cout << "passed!\n";
+    
+    cout << "Last n items test.............";
     TestTail();
+    cout << "passed!\n";
 
+    cout << "Minimum value test............";
     TestMinValue();
-    TestMaxValue();
+    cout << "passed!\n";
 
+    cout << "Maximum value test............";
+    TestMaxValue();
+    cout << "passed!\n";
+
+    cout << "Sum test......................";
     TestSum();
+    cout << "passed!\n";
     
+    cout << "Average value test............";
     TestAvgValue();
+    cout << "passed!\n";
     
+    cout << "Linearly spaced vector test...";
     TestSetLinSpaced();
+    cout << "passed!\n";
     
+    cout << "Logarithm test................";
     TestLog();
+    cout << "passed!\n";
     
+    cout << "Absolute values test..........";
     TestAbs();
+    cout << "passed!\n";
 
     // Test Vector arithmetics:
     // Scalar operations
+    cout << "Scalar arithmetics test.......";
     vector<CalcType> testMathVecA {
         12, 5, -1, 4, -6, 1, 59, -25, 72, 8
     };
     CalcType val = 5;
     TestArithmeticsScalar(testMathVecA, val);
+    cout << "passed!\n";
 
     // Vector operations
+    cout << "Vector arithmetics tests......";
     vector<CalcType> testMathVecB {
         -6, 1, 82, 5, -74, -6, 85, 0, -1, -47
     };
@@ -445,7 +473,8 @@ int main()
     TestArithmeticsVector(testMathVecA, testMathVecDiffSize);
 
     // First Vector is shorter than second Vector
-    //TestMath(testMathVecDiffSize, testMathVecB);
+    //TestArithmeticsVector(testMathVecDiffSize, testMathVecB);
+    cout << "passed!\n";
     
 
     cout << "\n=========================ALL TESTS COMPLETE!=========================\n\n";

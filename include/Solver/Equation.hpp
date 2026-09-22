@@ -59,7 +59,7 @@ private:
 
     CalcType BilinearInterpolation(
         Vector& grid,
-        Matrix values,
+        Matrix& values,
         CalcType x,
         CalcType y,
         CalcType max_distance,
@@ -68,8 +68,8 @@ private:
     );
 
     CalcType Extrapolation(
-        Vector grid, 
-        Matrix values, 
+        Vector& grid, 
+        Matrix& values, 
         CalcType distance, 
         CalcType max_distance, 
         ExtrapolationType type, 

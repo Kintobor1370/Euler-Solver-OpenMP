@@ -31,6 +31,8 @@ void EulerSolver::addDerivative(Vector derivative)
     results.Derivatives.emplace_back(std::move(derivative)); 
 }
 
+EulerSolver::EulerSolver() {}
+
 // Solve given equation numericaly for fixed amount of iterations
 SolverResults EulerSolver::Solve(
     Equation currEquation,

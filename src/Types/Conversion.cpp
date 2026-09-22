@@ -5,14 +5,19 @@ using namespace std;
 
 
 //__________________________________________________CONVERTION FUNCTIONS__________________________________________________
-Vector MatrixToVector(Matrix mat, bool symmetric)
+Vector MatrixToVector(Matrix& mat, bool symmetric)
 {
-    Vector result;
+    int size = 
+        symmetric ?
+            mat.size() * (mat.size() - 1) / 2 :
+            mat.size() * mat.size();
+    
+    Vector result(size);
     if (symmetric)
     {
-        for (int i=0; i<mat.size(); i++)
+        for (int i = 0; i < mat.size(); i++)
         {
-            for (int j=i; j<mat.size(); j++)
+            for (int j = i; j < mat.size(); j++)
             {
                 result.add(mat[i][j]);
             }
@@ -20,29 +25,34 @@ Vector MatrixToVector(Matrix mat, bool symmetric)
     }
     else
     {
-        for (int i=0; i<mat.size(); i++)
+        for (int i = 0; i < mat.size(); i++)
         {
-            for (int j=0; j<mat.size(); j++)
+            for (int j = 0; j < mat.size(); j++)
             {
                 result.add(mat[i][j]);
             }
         }
     }
-return result;
+    return result;
 }
 
-Vector MatrixOfMatrixToVector(MatrixOfMatrix matOfMat, bool symmetric)
+Vector MatrixOfMatrixToVector(MatrixOfMatrix& matOfMat, bool symmetric)
 {
-    Vector result;
+    int size = 
+        symmetric ?
+            matOfMat.size() * matOfMat.size() * matOfMat(0, 0).size() * (matOfMat(0, 0).size() - 1) / 2 :
+            matOfMat.size() * matOfMat.size() * matOfMat(0, 0).size() * matOfMat(0, 0).size();
+        
+    Vector result(size);
     if (symmetric)
     {
-        for (int i=0; i<matOfMat.size(); i++)
+        for (int i = 0; i < matOfMat.size(); i++)
         {
-            for (int j=0; j<matOfMat.size(); j++)
+            for (int j = 0; j < matOfMat.size(); j++)
             {
-                for (int k=0; k<matOfMat(i, j).size(); k++)
+                for (int k = 0; k < matOfMat(i, j).size(); k++)
                 {
-                    for (int l=k; l<matOfMat(i, j).size(); l++)
+                    for (int l = k; l < matOfMat(i, j).size(); l++)
                     {
                         result.add(matOfMat(i, j)[k][l]);
                     }
@@ -52,13 +62,13 @@ Vector MatrixOfMatrixToVector(MatrixOfMatrix matOfMat, bool symmetric)
     }
     else
     {
-        for (int i=0; i<matOfMat.size(); i++)
+        for (int i = 0; i < matOfMat.size(); i++)
         {
-            for (int j=0; j<matOfMat.size(); j++)
+            for (int j = 0; j < matOfMat.size(); j++)
             {
-                for (int k=0; k<matOfMat(i, j).size(); k++)
+                for (int k = 0; k < matOfMat(i, j).size(); k++)
                 {
-                    for (int l=0; l<matOfMat(i, j).size(); l++)
+                    for (int l = 0; l < matOfMat(i, j).size(); l++)
                     {
                         result.add(matOfMat(i, j)[k][l]);
                     }
@@ -69,7 +79,7 @@ Vector MatrixOfMatrixToVector(MatrixOfMatrix matOfMat, bool symmetric)
     return result;
 }
 
-Matrix VectorToMatrix(Vector vec, int matSize, bool symmetric)
+Matrix VectorToMatrix(Vector& vec, int matSize, bool symmetric)
 {
     int totalSize = matSize * matSize;
     if (symmetric)
@@ -110,7 +120,7 @@ Matrix VectorToMatrix(Vector vec, int matSize, bool symmetric)
 }
 
 MatrixOfMatrix VectorToMatrixOfMatrix(
-    Vector vec, 
+    Vector& vec, 
     int matOfMatSize, 
     int matSize, 
     bool symmetric
@@ -170,21 +180,20 @@ MatrixOfMatrix VectorToMatrixOfMatrix(
 }
 
 MatrixOfFunction VectorToMatrixOfFunction(
-    Vector xVec, 
-    Vector yVec, 
+    Vector& xVec, 
+    Vector& yVec, 
     int matOfFuncSize
 ) {
     assert (yVec.size() == matOfFuncSize * matOfFuncSize * xVec.size());
     MatrixOfFunction result(matOfFuncSize);
     int index = 0;
 
-    for (int i=0; i<result.size(); i++)
+    for (int i = 0; i < result.size(); i++)
     {
-        for (int j=0; j<result.size(); j++)
+        for (int j = 0; j < result.size(); j++)
         {
-            Vector yVals;
-
-            for (int k=0; k<xVec.size(); k++)
+            Vector yVals(xVec.size());
+            for (int k = 0; k < xVec.size(); k++)
             {
                 yVals.add(yVec[index]);
                 index++;
@@ -198,9 +207,9 @@ MatrixOfFunction VectorToMatrixOfFunction(
 
     bool IsSymmetric(Matrix mat)
     {
-    for (int i=0; i<mat.size(); i++)
+    for (int i = 0; i < mat.size(); i++)
     {
-        for (int j=i; j<mat.size(); j++)
+        for (int j = i; j < mat.size(); j++)
         {
             if (mat[i][j] != mat[j][i])
             {

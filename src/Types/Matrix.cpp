@@ -6,17 +6,15 @@ using namespace std;
 
 
 //______________________________SQUARE MATRIX OF CALCULATION TYPE_____________________________
-Matrix::Matrix(const int size)
-{ 
-    resize(size); 
-}
-
-Matrix::Matrix(const int size, CalcType val)
+Matrix::Matrix(const int size, const CalcType val)
 {
-    mat.reserve(size);
-    for (int i = 0; i < size; i++)
+    if (size > 0)
     {
-        mat.push_back(Vector(size, val));
+        mat.reserve(size);
+        for (int i = 0; i < size; i++)
+        {
+            mat.push_back(Vector(size, val));
+        }
     }
 }
 
@@ -25,7 +23,7 @@ Vector& Matrix::operator [] (const int rowNum)
     return mat.at(rowNum); 
 }
 
-int Matrix::size()
+int Matrix::size() const
 { 
     return mat.size(); 
 }
@@ -33,7 +31,7 @@ int Matrix::size()
 void Matrix::resize(const int newSize)
 {
     mat.resize(newSize);
-    for (auto &col : mat)
+    for (auto& col : mat)
     {
         col.resize(newSize);
     }
@@ -48,17 +46,18 @@ void Matrix::resize(const int r, const int c)
     }
 }
 
-Vector Matrix::Row(const int rowNum) 
+Vector Matrix::Row(const int rowNum) const
 { 
     return mat.at(rowNum); 
 }
 
 Vector Matrix::Col(const int colNum)
 {
-    Vector col(mat.size());
-    for (int i = 0; i < mat.size(); i++)
+    int size = mat.size();
+    Vector col(size);
+    for (int i = 0; i < size; i++)
     {
-        col[i] = mat.at(i)[colNum];
+        col.add(mat.at(i)[colNum]);
     }
     return col;
 }

@@ -231,7 +231,7 @@ CalcType Equation::MakeIntegralWithPairDensityShift(
 
 CalcType Equation::BilinearInterpolation(
     Vector& grid,
-    Matrix values,
+    Matrix& values,
     CalcType x,
     CalcType y,
     CalcType max_distance,
@@ -269,8 +269,8 @@ CalcType Equation::BilinearInterpolation(
 }
 
 CalcType Equation::Extrapolation(
-    Vector grid, 
-    Matrix values, 
+    Vector& grid, 
+    Matrix& values, 
     CalcType distance, 
     CalcType max_distance, 
     ExtrapolationType type, 
@@ -297,7 +297,7 @@ CalcType Equation::Extrapolation(
         case Alpha:
         {
             CalcType alpha = 2 / (grid.size() + 1);
-            Vector predicted_values;
+            Vector predicted_values((int)grid.size());
             
             predicted_values.add(values[0][0]);
             for (int k = 1; k < grid.size(); k++)
@@ -334,7 +334,7 @@ CalcType Equation::Extrapolation(
     return extrapolated_value;
 }
 
-Equation::Equation(Properties p) : props(p) {}
+Equation::Equation(Properties p) : props(p), N(p.SpeciesNumber) {}
 
 // Make Vector of equilibrium values for N (Vector) and C (Matrix of Matrix). Here C=N*N
 Vector Equation::GenerateEquilibriumValuesForNAndC(CalcType value)
@@ -345,7 +345,7 @@ Vector Equation::GenerateEquilibriumValuesForNAndC(CalcType value)
                  props.MomentsGrid.size() * 
                  props.MomentsGrid.size();
     
-    Vector result;  
+    Vector result(N_size + C_size);
     for (int i = 0; i < N_size; i++)
     {
         result.add(value);
