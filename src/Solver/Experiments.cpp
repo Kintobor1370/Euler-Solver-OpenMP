@@ -158,7 +158,7 @@ vector<SolverResults> Experiments::CalculateWithVaryingSigma(
 // Run visualisation script
 void Experiments::RunVisualiser()
 { 
-    string visCommand = "python3 .." + file_path_separator + "Visualiser.py";
+    string visCommand = "python3 Visualiser.py";
     system(visCommand.c_str());
 }
 
@@ -169,10 +169,7 @@ Experiments::Experiments()
     #else
         file_path_separator = "/";
     #endif
-    file_path_prefix = ".." + 
-                       file_path_separator + 
-                       "Data" + 
-                       file_path_separator;
+    file_path_prefix = "data" + file_path_separator;
     visdata_path = file_path_prefix + "VisData.csv";
 }
 
